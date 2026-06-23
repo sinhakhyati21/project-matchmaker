@@ -7,6 +7,9 @@ import StatusUpdate from "../../components/StatusUpdate";
 import GitHubRepos from "../../components/GitHubRepos";
 import ContributionGraph from "../../components/ContributionGraph";
 
+import "../../models/Review.model";
+import { getTrustScore } from "../../lib/trustScore";
+
 export default async function ProfilePage() {
   const session = await auth();
 
@@ -17,7 +20,12 @@ export default async function ProfilePage() {
   await connectDB();
 
   const user = await User.findById(session.user.id);
-  const safeUser = JSON.parse(JSON.stringify(user));
+
+  const trustScore = await getTrustScore(
+    session.user.id
+  );
+
+const safeUser = JSON.parse(JSON.stringify(user));
 
   if (!safeUser) {
     redirect("/signin");
@@ -58,7 +66,25 @@ export default async function ProfilePage() {
       </div>
 
       <StatusUpdate currentStatus={safeUser.status} />
-
+      <section className="border rounded-xl p-5">
+        <h2 className="text-2xl font-bold">
+          Trust Score
+        </h2>
+        {trustScore.count === 0 ? (
+          <p className="text-gray-500 mt-2">
+            No reviews yet.
+          </p>
+        ) : (
+          <>
+            <p className="text-4xl font-bold mt-2">
+              {trustScore.average}/5
+            </p>
+            <p className="text-gray-500 mt-1">
+              Based on {trustScore.count} review(s)
+            </p>
+          </>
+        )}
+      </section>
       <section>
         <h2 className="text-2xl font-bold mb-4">
           GitHub Contribution Graph
