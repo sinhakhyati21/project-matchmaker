@@ -59,7 +59,6 @@ export default async function DashboardPage() {
               <p className="text-sm text-gray-500 mt-3">
                 Status: <b>{project.status || "RECRUITING"}</b>
               </p>
-
               <ProjectStatusActions
                 projectId={project._id}
                 currentStatus={project.status || "RECRUITING"}

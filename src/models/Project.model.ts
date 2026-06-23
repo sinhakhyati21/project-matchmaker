@@ -9,6 +9,7 @@ export interface IProject extends Document {
   maxTeamSize: number;
   status: "RECRUITING" | "ACTIVE" | "COMPLETED" | "ARCHIVED";
   owner: mongoose.Types.ObjectId;
+  members: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,6 +58,12 @@ const ProjectSchema = new mongoose.Schema<IProject>(
       ref: "User",
       required: true,
     },
+    members: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true,

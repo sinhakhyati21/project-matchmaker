@@ -41,6 +41,7 @@ export async function POST(req: Request) {
     const project = await Project.create({
       ...body,
       owner: session.user.id,
+      members: [],
     });
 
     return NextResponse.json(project, { status: 201 });

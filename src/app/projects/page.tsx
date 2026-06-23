@@ -5,7 +5,9 @@ import ProjectCard from "../../components/ProjectCard";
 export default async function ProjectsPage() {
   await connectDB();
 
-  const projects = await Project.find()
+  const projects = await Project.find({
+    status: "RECRUITING",
+  })
     .populate("owner", "name githubUsername image")
     .sort({ createdAt: -1 });
 

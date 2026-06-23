@@ -11,6 +11,7 @@ type ProjectCardProps = {
     requiredSkills: string[];
     requiredRoles: string[];
     maxTeamSize: number;
+    members: string[];
     status?: string;
     owner?: {
       name?: string;
@@ -89,7 +90,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       <p className="text-sm text-gray-500">
         Owner: {project.owner?.name || project.owner?.githubUsername || "Unknown"}
       </p>
-
+      
       <button
         onClick={applyToProject}
         disabled={loading}
