@@ -14,7 +14,7 @@ export default function SkillsEditor({
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function addSkill() {
+  async function addSkill() {
     const trimmed = input.trim();
     if (!trimmed) return;
     if (skills.includes(trimmed)) {
@@ -22,27 +22,47 @@ export default function SkillsEditor({
       setInput("");
       return;
     }
-    setSkills([...skills, trimmed]);
+
+    const newSkills = [...skills, trimmed];
+    setSkills(newSkills);
     setInput("");
-  }
 
-  function removeSkill(skill: string) {
-    setSkills(skills.filter((s) => s !== skill));
-  }
-
-  async function saveSkills() {
     setLoading(true);
     const res = await fetch("/api/user/skills", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ skills }),
+      body: JSON.stringify({ skills: newSkills }),
     });
 
     if (res.ok) {
-      toast.success("Skills saved!");
+      toast.success(`"${trimmed}" added!`);
       router.refresh();
     } else {
-      toast.error("Failed to save skills");
+      toast.error("Failed to save skill");
+      // Revert on failure
+      setSkills(skills);
+    }
+    setLoading(false);
+  }
+
+  async function removeSkill(skill: string) {
+    const newSkills = skills.filter((s) => s !== skill);
+    setSkills(newSkills);
+
+    setLoading(true);
+    const res = await fetch("/api/user/skills", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ skills: newSkills }),
+    });
+
+    if (res.ok) {
+      toast.success(`"${skill}" removed!`);
+      router.refresh();
+    } else {
+      toast.error("Failed to remove skill");
+      // Revert on failure
+      setSkills(skills);
     }
     setLoading(false);
   }
@@ -64,7 +84,8 @@ export default function SkillsEditor({
             {skill}
             <button
               onClick={() => removeSkill(skill)}
-              className="ml-1 text-indigo-400 hover:text-red-500 font-bold"
+              disabled={loading}
+              className="ml-1 text-indigo-400 hover:text-red-500 font-bold disabled:opacity-50"
             >
               ×
             </button>
@@ -88,20 +109,12 @@ export default function SkillsEditor({
         />
         <button
           onClick={addSkill}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+          disabled={loading}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
         >
-          Add
+          {loading ? "Saving..." : "Add"}
         </button>
       </div>
-
-      {/* Save Button */}
-      <button
-        onClick={saveSkills}
-        disabled={loading}
-        className="bg-black text-white px-4 py-2 rounded-lg disabled:opacity-50"
-      >
-        {loading ? "Saving..." : "Save Skills"}
-      </button>
     </section>
   );
 }
