@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
-
 import Providers from "./providers";
+import Navbar from "../components/Navbar";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Project Matchmaker",
-  description: "Find teammates for hackathons",
+  description: "Find teammates for hackathons, projects and startups",
 };
 
 export default function RootLayout({
@@ -16,7 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Navbar />
+          <main>{children}</main>
+          <Toaster position="top-right" richColors />
+        </Providers>
       </body>
     </html>
   );
