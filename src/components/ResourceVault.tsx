@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type Resource = {
   _id: string;
@@ -20,7 +21,6 @@ export default function ResourceVault({
   resources: Resource[];
 }) {
   const router = useRouter();
-
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [type, setType] = useState("OTHER");
@@ -28,38 +28,28 @@ export default function ResourceVault({
 
   async function createResource(e: React.FormEvent) {
     e.preventDefault();
-
     if (!title || !url) {
-      alert("Title and URL are required");
+      toast.error("Title and URL are required");
       return;
     }
 
     setLoading(true);
-
     const res = await fetch("/api/resources", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        hubId,
-        projectId,
-        title,
-        url,
-        type,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hubId, projectId, title, url, type }),
     });
 
     if (res.ok) {
+      toast.success("Resource added!");
       setTitle("");
       setUrl("");
       setType("OTHER");
       router.refresh();
     } else {
       const data = await res.json();
-      alert(data.message || "Failed to add resource");
+      toast.error(data.message || "Failed to add resource");
     }
-
     setLoading(false);
   }
 
@@ -70,21 +60,18 @@ export default function ResourceVault({
         className="border rounded-xl p-4 space-y-3"
       >
         <h3 className="font-bold">Add Resource</h3>
-
         <input
           className="border rounded-lg px-3 py-2 w-full"
           placeholder="Resource title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-
         <input
           className="border rounded-lg px-3 py-2 w-full"
           placeholder="https://example.com"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
-
         <select
           className="border rounded-lg px-3 py-2 w-full"
           value={type}
@@ -93,12 +80,9 @@ export default function ResourceVault({
           <option value="GITHUB">GitHub</option>
           <option value="DESIGN">Design</option>
           <option value="DOCS">Docs</option>
-          <option value="PRESENTATION">
-            Presentation
-          </option>
+          <option value="PRESENTATION">Presentation</option>
           <option value="OTHER">Other</option>
         </select>
-
         <button
           disabled={loading}
           className="bg-black text-white px-4 py-2 rounded-lg disabled:opacity-50"
@@ -108,31 +92,24 @@ export default function ResourceVault({
       </form>
 
       {resources.length === 0 ? (
-        <p className="text-gray-500">
-          No resources added yet.
-        </p>
+        <p className="text-gray-500">No resources added yet.</p>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
-          {resources.map((resource) => (
-            <a
-              key={resource._id}
-              href={resource.url}
-              target="_blank"
-              className="border rounded-xl p-4 hover:bg-gray-50"
-            >
-              <p className="text-sm text-gray-500">
-                {resource.type}
-              </p>
-
-              <h3 className="font-bold">
-                {resource.title}
-              </h3>
-
-              <p className="text-sm text-blue-600 break-all mt-1">
-                {resource.url}
-              </p>
-            </a>
-          ))}
+          {resources.map((resource) => {
+            return (
+              <div
+                key={resource._id}
+                onClick={() => window.open(resource.url, "_blank")}
+                className="border rounded-xl p-4 hover:bg-gray-50 cursor-pointer"
+              >
+                <p className="text-sm text-gray-500">{resource.type}</p>
+                <h3 className="font-bold">{resource.title}</h3>
+                <p className="text-sm text-blue-600 break-all mt-1">
+                  {resource.url}
+                </p>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

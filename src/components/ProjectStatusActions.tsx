@@ -2,12 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
-type ProjectStatus =
-  | "RECRUITING"
-  | "ACTIVE"
-  | "COMPLETED"
-  | "ARCHIVED";
+type ProjectStatus = "RECRUITING" | "ACTIVE" | "COMPLETED" | "ARCHIVED";
 
 export default function ProjectStatusActions({
   projectId,
@@ -23,27 +20,22 @@ export default function ProjectStatusActions({
     const confirmed = window.confirm(
       `Are you sure you want to mark this project as ${status}?`
     );
-
     if (!confirmed) return;
 
     setLoading(true);
-
     const res = await fetch(`/api/projects/${projectId}/status`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
 
     const data = await res.json();
-
     if (res.ok) {
+      toast.success(`Project marked as ${status}`);
       router.refresh();
     } else {
-      alert(data.message || "Failed to update status");
+      toast.error(data.message || "Failed to update status");
     }
-
     setLoading(false);
   }
 
@@ -58,7 +50,6 @@ export default function ProjectStatusActions({
           Recruiting
         </button>
       )}
-
       {currentStatus !== "ACTIVE" && (
         <button
           disabled={loading}
@@ -68,7 +59,6 @@ export default function ProjectStatusActions({
           Active
         </button>
       )}
-
       {currentStatus !== "COMPLETED" && (
         <button
           disabled={loading}
@@ -78,7 +68,6 @@ export default function ProjectStatusActions({
           Completed
         </button>
       )}
-
       {currentStatus !== "ARCHIVED" && (
         <button
           disabled={loading}

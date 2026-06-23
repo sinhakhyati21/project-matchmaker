@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 type ProjectCardProps = {
   project: {
@@ -26,25 +27,18 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   async function applyToProject() {
     setLoading(true);
-
     const res = await fetch("/api/applications", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        projectId: project._id,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectId: project._id }),
     });
 
     const data = await res.json();
-
     if (res.ok) {
-      alert("Applied successfully!");
+      toast.success("Applied successfully! Check your dashboard for updates.");
     } else {
-      alert(data.message || "Failed to apply");
+      toast.error(data.message || "Failed to apply");
     }
-
     setLoading(false);
   }
 
@@ -88,9 +82,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       </div>
 
       <p className="text-sm text-gray-500">
-        Owner: {project.owner?.name || project.owner?.githubUsername || "Unknown"}
+        Owner:{" "}
+        {project.owner?.name ||
+          project.owner?.githubUsername ||
+          "Unknown"}
       </p>
-      
+
       <button
         onClick={applyToProject}
         disabled={loading}

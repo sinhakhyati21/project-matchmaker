@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function ApplicationActions({
   applicationId,
@@ -13,62 +14,52 @@ export default function ApplicationActions({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  async function updateStatus(status: "ACCEPTED" | "REJECTED") {
-    setLoading(true);
-
-    const res = await fetch(`/api/applications/${applicationId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status }),
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      router.refresh();
-    } else {
-      alert(data.message || "Failed to update application");
-    }
-
-    setLoading(false);
-  }
-
-  function confirmAndUpdate(status: "ACCEPTED" | "REJECTED") {
+  async function updateStatus(nextStatus: "ACCEPTED" | "REJECTED") {
     const message =
-      status === "ACCEPTED"
+      nextStatus === "ACCEPTED"
         ? "Are you sure you want to accept this candidate?"
         : "Are you sure you want to reject this candidate?";
 
     const confirmed = window.confirm(message);
+    if (!confirmed) return;
 
-    if (confirmed) {
-      updateStatus(status);
+    setLoading(true);
+    const res = await fetch(`/api/applications/${applicationId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: nextStatus }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      toast.success(
+        nextStatus === "ACCEPTED"
+          ? "Candidate accepted!"
+          : "Candidate rejected."
+      );
+      router.refresh();
+    } else {
+      toast.error(data.message || "Failed to update application");
     }
+    setLoading(false);
   }
 
   if (status !== "PENDING") {
-    return (
-      <span className="font-semibold">
-        {status}
-      </span>
-    );
+    return <span className="font-semibold">{status}</span>;
   }
 
   return (
     <div className="flex gap-2">
       <button
         disabled={loading}
-        onClick={() => confirmAndUpdate("ACCEPTED")}
+        onClick={() => updateStatus("ACCEPTED")}
         className="bg-green-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
       >
         Accept
       </button>
-
       <button
         disabled={loading}
-        onClick={() => confirmAndUpdate("REJECTED")}
+        onClick={() => updateStatus("REJECTED")}
         className="bg-red-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
       >
         Reject
