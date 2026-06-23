@@ -11,6 +11,10 @@ type Recommendation = {
   skills: string[];
   matchedSkills: string[];
   score: number;
+  trustScore: {
+    average: number;
+    count: number;
+  };
 };
 
 export default function TeamRecommendations({
@@ -39,9 +43,7 @@ export default function TeamRecommendations({
       setRecommendations(data);
     } else {
       const data = await res.json();
-      alert(
-        data.message || "Failed to load recommendations"
-      );
+      alert(data.message || "Failed to load recommendations");
     }
 
     setLoading(false);
@@ -56,7 +58,7 @@ export default function TeamRecommendations({
           </h3>
 
           <p className="text-sm text-gray-500">
-            Skill-based candidate ranking
+            Skill-based candidate ranking with trust score
           </p>
         </div>
 
@@ -113,13 +115,23 @@ export default function TeamRecommendations({
                 </div>
               </div>
 
-              <div className="text-right">
+              <div className="text-right min-w-[120px]">
                 <p className="font-bold text-lg">
                   {user.score}%
                 </p>
 
                 <p className="text-sm text-gray-500">
                   match
+                </p>
+
+                <p className="text-sm mt-3">
+                  Trust:
+                </p>
+
+                <p className="font-semibold">
+                  {user.trustScore.count === 0
+                    ? "No reviews"
+                    : `${user.trustScore.average}/5`}
                 </p>
               </div>
             </div>

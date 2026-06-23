@@ -5,6 +5,8 @@ import { connectDB } from "../../../lib/db";
 
 import User from "../../../models/User.model";
 import Project from "../../../models/Project.model";
+import "../../../models/Review.model";
+import { getTrustScore } from "../../../lib/trustScore";
 
 function normalizeSkill(skill: string) {
   return skill.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -56,8 +58,8 @@ export async function POST(req: Request) {
       normalized: normalizeSkill(skill),
     }));
 
-    const recommendations = users
-      .map((user: any) => {
+    const recommendations = await Promise.all(
+      users.map(async (user: any) => {
         const userSkills = (user.skills || []).map((skill: string) => ({
           original: skill,
           normalized: normalizeSkill(skill),
@@ -79,6 +81,8 @@ export async function POST(req: Request) {
                 (matchedSkills.length / requiredSkills.length) * 100
               );
 
+        const trustScore = await getTrustScore(user._id.toString());
+
         return {
           _id: user._id,
           name: user.name,
@@ -88,9 +92,15 @@ export async function POST(req: Request) {
           skills: user.skills || [],
           matchedSkills,
           score,
+          trustScore,
         };
       })
-      .sort((a, b) => b.score - a.score);
+    );
+
+    recommendations.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return b.trustScore.average - a.trustScore.average;
+    });
 
     return NextResponse.json(recommendations);
   } catch (error) {
