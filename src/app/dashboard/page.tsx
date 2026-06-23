@@ -63,6 +63,12 @@ export default async function DashboardPage() {
                 projectId={project._id}
                 currentStatus={project.status || "RECRUITING"}
               />
+              <a
+                href={`/hub/${project._id}`}
+                className="inline-block mt-4 text-blue-600 font-medium"
+              >
+                Open Hub
+              </a>
             </div>
           ))}
         </div>
@@ -102,6 +108,7 @@ export default async function DashboardPage() {
                 applicationId={application._id}
                 status={application.status}
               />
+              
             </div>
           ))}
         </div>
