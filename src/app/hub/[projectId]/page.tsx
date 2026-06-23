@@ -16,6 +16,9 @@ import CreateTaskForm from "../../../components/CreateTaskForm";
 import ResourceVault from "../../../components/ResourceVault";
 import TeamChat from "../../../components/TeamChat";
 
+import Review from "../../../models/Review.model";
+import ReviewForm from "../../../components/ReviewForm";
+
 export default async function HubPage({
   params,
 }: {
@@ -76,7 +79,13 @@ export default async function HubPage({
   })
     .populate("sender", "name githubUsername image")
     .sort({ createdAt: 1 });
-
+  
+    const reviews = await Review.find({
+      project: projectId,
+    })
+    .populate("reviewer", "name githubUsername image")
+    .populate("reviewee", "name githubUsername image")
+    .sort({ createdAt: -1 });
   const safeHub = JSON.parse(JSON.stringify(hub));
   const safeTasks = JSON.parse(JSON.stringify(tasks));
   const safeResources = JSON.parse(
@@ -85,7 +94,7 @@ export default async function HubPage({
   const safeMessages = JSON.parse(
     JSON.stringify(messages)
   );
-
+  const safeReviews = JSON.parse(JSON.stringify(reviews));
   return (
     <div className="p-10 space-y-8">
       <div>
@@ -178,6 +187,44 @@ export default async function HubPage({
         projectId={safeHub.project._id}
         messages={safeMessages}
       />
+      <section>
+  <ReviewForm
+    projectId={safeHub.project._id}
+    members={safeHub.members}
+    currentUserId={session.user.id}
+  />
+
+  <div className="mt-6 space-y-3">
+    <h2 className="text-2xl font-bold">Reviews</h2>
+
+    {safeReviews.length === 0 ? (
+      <p className="text-gray-500">No reviews yet.</p>
+    ) : (
+      safeReviews.map((review: any) => (
+        <div
+          key={review._id}
+          className="border rounded-xl p-4"
+        >
+          <p className="font-semibold">
+            {review.reviewer?.name} reviewed {review.reviewee?.name}
+          </p>
+
+          <p className="text-sm mt-2">
+            Communication: {review.communication}/5 · Technical:{" "}
+            {review.technicalSkills}/5 · Reliability: {review.reliability}/5 ·
+            Teamwork: {review.teamwork}/5
+          </p>
+
+          {review.comment && (
+            <p className="text-gray-600 mt-2">
+              {review.comment}
+            </p>
+          )}
+        </div>
+      ))
+    )}
+  </div>
+</section>
     </div>
   );
 }
