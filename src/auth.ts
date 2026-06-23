@@ -39,9 +39,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return false;
       }
     },
+
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.sub!;
+        try {
+          await connectDB();
+          const dbUser = await User.findOne({ email: session.user.email });
+          if (dbUser) {
+            session.user.id = dbUser._id.toString();
+          } else {
+            session.user.id = token.sub!;
+          }
+        } catch (error) {
+          console.error("Error fetching user ID in session:", error);
+          session.user.id = token.sub!;
+        }
       }
 
       return session;
