@@ -6,6 +6,7 @@ import Project from "../../models/Project.model";
 import Application from "../../models/Application.model";
 import ApplicationActions from "../../components/ApplicationActions";
 import ProjectStatusActions from "../../components/ProjectStatusActions";
+import TeamRecommendations from "../../components/TeamRecommendations";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -63,6 +64,7 @@ export default async function DashboardPage() {
                 projectId={project._id}
                 currentStatus={project.status || "RECRUITING"}
               />
+              <TeamRecommendations projectId={project._id} />
               <a
                 href={`/hub/${project._id}`}
                 className="inline-block mt-4 text-blue-600 font-medium"
