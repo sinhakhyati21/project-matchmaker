@@ -68,7 +68,16 @@ export async function PATCH(
         { status: 403 }
       );
     }
-
+    if (status === "TODO" && task.status !== "TODO") {
+  return NextResponse.json(
+    {
+      message: "A started task cannot be moved back to To Do",
+    },
+    {
+      status: 400,
+    }
+  );
+}
     task.status = status;
     await task.save();
 
