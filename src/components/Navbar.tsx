@@ -19,6 +19,7 @@ export default async function Navbar() {
           <>
             <Link href="/create-project">Create Project</Link>
             <Link href="/dashboard">Dashboard</Link>
+            <Link href="/profile">Profile</Link>
           </>
         )}
 

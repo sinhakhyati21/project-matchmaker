@@ -17,20 +17,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       try {
         await connectDB();
 
+        const githubProfile = profile as {
+          login?: string;
+          bio?: string;
+          html_url?: string;
+        };
+
         await User.findOneAndUpdate(
-          {
-            email: user.email,
-          },
+          { email: user.email },
           {
             name: user.name,
             email: user.email,
             image: user.image,
-            githubUsername: (profile as any)?.login,
+            githubUsername: githubProfile.login,
+            githubBio: githubProfile.bio,
+            githubUrl: githubProfile.html_url,
           },
-          {
-            upsert: true,
-            new: true,
-          }
+          { upsert: true, new: true }
         );
 
         return true;
@@ -44,14 +47,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user) {
         try {
           await connectDB();
-          const dbUser = await User.findOne({ email: session.user.email });
+
+          const dbUser = await User.findOne({
+            email: session.user.email,
+          });
+
           if (dbUser) {
             session.user.id = dbUser._id.toString();
           } else {
             session.user.id = token.sub!;
           }
-        } catch (error) {
-          console.error("Error fetching user ID in session:", error);
+        } catch {
           session.user.id = token.sub!;
         }
       }

@@ -4,28 +4,22 @@ export interface IUser extends Document {
   name: string;
   email: string;
   image?: string;
-
   githubUsername?: string;
-  bio?: string;
-
+  githubBio?: string;
+  githubUrl?: string;
   skills: string[];
-
   status:
     | "AVAILABLE"
     | "BUSY"
     | "LOOKING_FOR_TEAM"
     | "LOOKING_FOR_PROJECT";
-
   createdAt: Date;
   updatedAt: Date;
 }
 
 const UserSchema = new mongoose.Schema<IUser>(
   {
-    name: {
-      type: String,
-      required: true,
-    },
+    name: { type: String, required: true },
 
     email: {
       type: String,
@@ -36,8 +30,8 @@ const UserSchema = new mongoose.Schema<IUser>(
     image: String,
 
     githubUsername: String,
-
-    bio: String,
+    githubBio: String,
+    githubUrl: String,
 
     skills: {
       type: [String],
@@ -55,13 +49,10 @@ const UserSchema = new mongoose.Schema<IUser>(
       default: "AVAILABLE",
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const User: Model<IUser> =
-  mongoose.models.User ||
-  mongoose.model<IUser>("User", UserSchema);
+  mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 
 export default User;
