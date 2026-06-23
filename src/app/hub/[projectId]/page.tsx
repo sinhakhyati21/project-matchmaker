@@ -8,8 +8,11 @@ import "../../../models/Project.model";
 import "../../../models/User.model";
 
 import Task from "../../../models/Task.model";
+import Resource from "../../../models/Resource.model";
+
 import KanbanBoard from "../../../components/KanbanBoard";
 import CreateTaskForm from "../../../components/CreateTaskForm";
+import ResourceVault from "../../../components/ResourceVault";
 
 export default async function HubPage({
   params,
@@ -30,12 +33,18 @@ export default async function HubPage({
     project: projectId,
   })
     .populate("project", "title description status")
-    .populate("members", "name email githubUsername image status");
+    .populate(
+      "members",
+      "name email githubUsername image status"
+    );
 
   if (!hub) {
     return (
       <div className="p-10">
-        <h1 className="text-3xl font-bold">Hub Not Found</h1>
+        <h1 className="text-3xl font-bold">
+          Hub Not Found
+        </h1>
+
         <p className="text-gray-500 mt-2">
           This project does not have a team hub yet.
         </p>
@@ -56,8 +65,15 @@ export default async function HubPage({
     hub: hub._id,
   }).sort({ createdAt: -1 });
 
+  const resources = await Resource.find({
+    hub: hub._id,
+  }).sort({ createdAt: -1 });
+
   const safeHub = JSON.parse(JSON.stringify(hub));
   const safeTasks = JSON.parse(JSON.stringify(tasks));
+  const safeResources = JSON.parse(
+    JSON.stringify(resources)
+  );
 
   return (
     <div className="p-10 space-y-8">
@@ -82,39 +98,36 @@ export default async function HubPage({
         </h2>
 
         <div className="grid md:grid-cols-2 gap-4">
-          {/* {safeHub.members.map((member: any) => (
-            <div
-              key={member._id}
-              className="border rounded-xl p-4 flex gap-4 items-center"
-            > */}
-            {safeHub.members.map((member: any, index: number) => (
-  <div
-    key={`${member._id}-${index}`}
-    className="border rounded-xl p-4 flex gap-4 items-center"
-  >
-              {member.image && (
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="w-12 h-12 rounded-full"
-                />
-              )}
+          {safeHub.members.map(
+            (member: any, index: number) => (
+              <div
+                key={`${member._id}-${index}`}
+                className="border rounded-xl p-4 flex gap-4 items-center"
+              >
+                {member.image && (
+                  <img
+                    src={member.image}
+                    alt={member.name}
+                    className="w-12 h-12 rounded-full"
+                  />
+                )}
 
-              <div>
-                <h3 className="font-bold">
-                  {member.name}
-                </h3>
+                <div>
+                  <h3 className="font-bold">
+                    {member.name}
+                  </h3>
 
-                <p className="text-sm text-gray-500">
-                  @{member.githubUsername || "github"}
-                </p>
+                  <p className="text-sm text-gray-500">
+                    @{member.githubUsername || "github"}
+                  </p>
 
-                <p className="text-sm">
-                  {member.status?.replaceAll("_", " ")}
-                </p>
+                  <p className="text-sm">
+                    {member.status?.replaceAll("_", " ")}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </section>
 
@@ -137,20 +150,23 @@ export default async function HubPage({
         <KanbanBoard tasks={safeTasks} />
       </section>
 
-      <section className="grid md:grid-cols-2 gap-4">
-        <div className="border rounded-xl p-5">
-          <h3 className="font-bold">Team Chat</h3>
-          <p className="text-sm text-gray-500 mt-2">
-            Coming next.
-          </p>
-        </div>
+      <section>
+        <h2 className="text-2xl font-bold mb-4">
+          Resource Vault
+        </h2>
 
-        <div className="border rounded-xl p-5">
-          <h3 className="font-bold">Resources</h3>
-          <p className="text-sm text-gray-500 mt-2">
-            Coming next.
-          </p>
-        </div>
+        <ResourceVault
+          hubId={safeHub._id}
+          projectId={safeHub.project._id}
+          resources={safeResources}
+        />
+      </section>
+
+      <section className="border rounded-xl p-5">
+        <h3 className="font-bold">Team Chat</h3>
+        <p className="text-sm text-gray-500 mt-2">
+          Coming next.
+        </p>
       </section>
     </div>
   );
