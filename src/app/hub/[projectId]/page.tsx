@@ -20,6 +20,9 @@ import TeamChat from "../../../components/TeamChat";
 import ReviewForm from "../../../components/ReviewForm";
 import DiscussionBoard from "../../../components/DiscussionBoard";
 
+import Expense from "../../../models/Expense.model";
+import ExpenseTracker from "../../../components/ExpenseTracker";
+
 export default async function HubPage({
   params,
 }: {
@@ -88,13 +91,18 @@ export default async function HubPage({
     .populate("author", "name githubUsername image")
     .populate("replies.author", "name githubUsername image")
     .sort({ createdAt: -1 });
-
+  const expenses = await Expense.find({
+    hub: hub._id,
+  })
+    .populate("paidBy", "name githubUsername image")
+    .sort({ createdAt: -1 });
   const safeHub = JSON.parse(JSON.stringify(hub));
   const safeTasks = JSON.parse(JSON.stringify(tasks));
   const safeResources = JSON.parse(JSON.stringify(resources));
   const safeMessages = JSON.parse(JSON.stringify(messages));
   const safeReviews = JSON.parse(JSON.stringify(reviews));
   const safeDiscussions = JSON.parse(JSON.stringify(discussions));
+  const safeExpenses = JSON.parse(JSON.stringify(expenses));
 
   return (
     <div className="p-10 space-y-8">
@@ -169,7 +177,11 @@ export default async function HubPage({
           resources={safeResources}
         />
       </section>
-
+      <ExpenseTracker
+        hubId={safeHub._id}
+        projectId={safeHub.project._id}
+        expenses={safeExpenses}
+      />
       <TeamChat
         hubId={safeHub._id}
         projectId={safeHub.project._id}
