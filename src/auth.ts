@@ -1,8 +1,8 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 
-import { connectDB } from "../src/lib/db";
-import User from "../src/models/User.model";
+import { connectDB } from "./lib/db";
+import User from "./models/User.model";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -38,6 +38,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         console.error("Error saving user:", error);
         return false;
       }
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub!;
+      }
+
+      return session;
     },
   },
 
