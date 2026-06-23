@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Message = {
   _id: string;
@@ -27,10 +27,29 @@ export default function TeamChat({
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const [chatMessages, setChatMessages] =
+    useState<Message[]>(messages);
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [showImageOptions, setShowImageOptions] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  async function fetchMessages() {
+    const res = await fetch(`/api/messages?hubId=${hubId}`);
+
+    if (res.ok) {
+      const data = await res.json();
+      setChatMessages(data);
+    }
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchMessages();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [hubId]);
 
   function handleDeviceImage(file: File) {
     const reader = new FileReader();
@@ -69,6 +88,7 @@ export default function TeamChat({
       setContent("");
       setImageUrl("");
       setShowImageOptions(false);
+      await fetchMessages();
       router.refresh();
     } else {
       const data = await res.json();
@@ -83,11 +103,14 @@ export default function TeamChat({
       <h2 className="text-2xl font-bold">Team Chat</h2>
 
       <div className="space-y-3 max-h-96 overflow-y-auto border rounded-xl p-4 bg-gray-50">
-        {messages.length === 0 ? (
+        {chatMessages.length === 0 ? (
           <p className="text-gray-500">No messages yet.</p>
         ) : (
-          messages.map((message) => (
-            <div key={message._id} className="bg-white border rounded-xl p-3">
+          chatMessages.map((message) => (
+            <div
+              key={message._id}
+              className="bg-white border rounded-xl p-3"
+            >
               <div className="flex items-center gap-3 mb-2">
                 {message.sender?.image && (
                   <img
@@ -119,10 +142,9 @@ export default function TeamChat({
               )}
 
               <p className="text-xs text-gray-400 mt-2">
-                { 
-                    new Date(message.createdAt).toLocaleString("en-IN", {
-                    dateStyle: "short",
-                    timeStyle: "medium",
+                {new Date(message.createdAt).toLocaleString("en-IN", {
+                  dateStyle: "short",
+                  timeStyle: "medium",
                 })}
               </p>
             </div>
@@ -140,7 +162,9 @@ export default function TeamChat({
 
         {imageUrl && (
           <div className="border rounded-xl p-3">
-            <p className="text-sm text-gray-500 mb-2">Image preview</p>
+            <p className="text-sm text-gray-500 mb-2">
+              Image preview
+            </p>
 
             <img
               src={imageUrl}
