@@ -9,10 +9,12 @@ import "../../../models/User.model";
 
 import Task from "../../../models/Task.model";
 import Resource from "../../../models/Resource.model";
+import Message from "../../../models/Message.model";
 
 import KanbanBoard from "../../../components/KanbanBoard";
 import CreateTaskForm from "../../../components/CreateTaskForm";
 import ResourceVault from "../../../components/ResourceVault";
+import TeamChat from "../../../components/TeamChat";
 
 export default async function HubPage({
   params,
@@ -69,10 +71,19 @@ export default async function HubPage({
     hub: hub._id,
   }).sort({ createdAt: -1 });
 
+  const messages = await Message.find({
+    hub: hub._id,
+  })
+    .populate("sender", "name githubUsername image")
+    .sort({ createdAt: 1 });
+
   const safeHub = JSON.parse(JSON.stringify(hub));
   const safeTasks = JSON.parse(JSON.stringify(tasks));
   const safeResources = JSON.parse(
     JSON.stringify(resources)
+  );
+  const safeMessages = JSON.parse(
+    JSON.stringify(messages)
   );
 
   return (
@@ -162,12 +173,11 @@ export default async function HubPage({
         />
       </section>
 
-      <section className="border rounded-xl p-5">
-        <h3 className="font-bold">Team Chat</h3>
-        <p className="text-sm text-gray-500 mt-2">
-          Coming next.
-        </p>
-      </section>
+      <TeamChat
+        hubId={safeHub._id}
+        projectId={safeHub.project._id}
+        messages={safeMessages}
+      />
     </div>
   );
 }
