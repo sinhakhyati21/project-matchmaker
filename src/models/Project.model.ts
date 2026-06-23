@@ -7,10 +7,13 @@ export interface IProject extends Document {
   requiredSkills: string[];
   requiredRoles: string[];
   maxTeamSize: number;
+  status: "RECRUITING" | "ACTIVE" | "COMPLETED" | "ARCHIVED";
   owner: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const ProjectSchema = new mongoose.Schema(
+const ProjectSchema = new mongoose.Schema<IProject>(
   {
     title: {
       type: String,
@@ -40,6 +43,13 @@ const ProjectSchema = new mongoose.Schema(
     maxTeamSize: {
       type: Number,
       required: true,
+      min: 2,
+    },
+
+    status: {
+      type: String,
+      enum: ["RECRUITING", "ACTIVE", "COMPLETED", "ARCHIVED"],
+      default: "RECRUITING",
     },
 
     owner: {
