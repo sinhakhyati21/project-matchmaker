@@ -7,6 +7,8 @@ import Invitation from "../../models/Invitation.model";
 import "../../models/Project.model";
 import "../../models/User.model";
 
+import InvitationActions from "../../components/InvitationActions";
+
 export default async function InvitationsPage() {
   const session = await auth();
 
@@ -63,6 +65,11 @@ export default async function InvitationsPage() {
               <p className="mt-2">
                 Status: <b>{invitation.status}</b>
               </p>
+
+              <InvitationActions
+                invitationId={invitation._id}
+                status={invitation.status}
+              />
             </div>
           ))}
         </div>
