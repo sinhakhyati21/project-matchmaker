@@ -6,8 +6,10 @@ import { connectDB } from "../../../lib/db";
 import Hub from "../../../models/Hub.model";
 import "../../../models/Project.model";
 import "../../../models/User.model";
+
 import Task from "../../../models/Task.model";
 import KanbanBoard from "../../../components/KanbanBoard";
+import CreateTaskForm from "../../../components/CreateTaskForm";
 
 export default async function HubPage({
   params,
@@ -42,7 +44,8 @@ export default async function HubPage({
   }
 
   const isMember = hub.members.some(
-    (member: any) => member._id.toString() === session.user.id
+    (member: any) =>
+      member._id.toString() === session.user.id
   );
 
   if (!isMember && process.env.NODE_ENV !== "development") {
@@ -59,24 +62,36 @@ export default async function HubPage({
   return (
     <div className="p-10 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">{safeHub.project?.title} Hub</h1>
+        <h1 className="text-3xl font-bold">
+          {safeHub.project?.title} Hub
+        </h1>
 
-        <p className="text-gray-500 mt-2">{safeHub.project?.description}</p>
+        <p className="text-gray-500 mt-2">
+          {safeHub.project?.description}
+        </p>
 
         <p className="text-sm mt-2">
-          Project Status: <b>{safeHub.project?.status}</b>
+          Project Status:{" "}
+          <b>{safeHub.project?.status}</b>
         </p>
       </div>
 
       <section>
-        <h2 className="text-2xl font-bold mb-4">Team Members</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          Team Members
+        </h2>
 
         <div className="grid md:grid-cols-2 gap-4">
-          {safeHub.members.map((member: any) => (
+          {/* {safeHub.members.map((member: any) => (
             <div
               key={member._id}
               className="border rounded-xl p-4 flex gap-4 items-center"
-            >
+            > */}
+            {safeHub.members.map((member: any, index: number) => (
+  <div
+    key={`${member._id}-${index}`}
+    className="border rounded-xl p-4 flex gap-4 items-center"
+  >
               {member.image && (
                 <img
                   src={member.image}
@@ -86,7 +101,9 @@ export default async function HubPage({
               )}
 
               <div>
-                <h3 className="font-bold">{member.name}</h3>
+                <h3 className="font-bold">
+                  {member.name}
+                </h3>
 
                 <p className="text-sm text-gray-500">
                   @{member.githubUsername || "github"}
@@ -102,7 +119,20 @@ export default async function HubPage({
       </section>
 
       <section>
-        <h2 className="text-2xl font-bold mb-4">Kanban Board</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          Create Task
+        </h2>
+
+        <CreateTaskForm
+          hubId={safeHub._id}
+          projectId={safeHub.project._id}
+        />
+      </section>
+
+      <section>
+        <h2 className="text-2xl font-bold mb-4">
+          Kanban Board
+        </h2>
 
         <KanbanBoard tasks={safeTasks} />
       </section>
@@ -110,12 +140,16 @@ export default async function HubPage({
       <section className="grid md:grid-cols-2 gap-4">
         <div className="border rounded-xl p-5">
           <h3 className="font-bold">Team Chat</h3>
-          <p className="text-sm text-gray-500 mt-2">Coming next.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Coming next.
+          </p>
         </div>
 
         <div className="border rounded-xl p-5">
           <h3 className="font-bold">Resources</h3>
-          <p className="text-sm text-gray-500 mt-2">Coming next.</p>
+          <p className="text-sm text-gray-500 mt-2">
+            Coming next.
+          </p>
         </div>
       </section>
     </div>
