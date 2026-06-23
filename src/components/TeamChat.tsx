@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 type Message = {
   _id: string;
@@ -25,16 +25,28 @@ export default function TeamChat({
   messages: Message[];
 }) {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [showImageOptions, setShowImageOptions] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  function handleDeviceImage(file: File) {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      setImageUrl(reader.result as string);
+    };
+
+    reader.readAsDataURL(file);
+  }
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!content.trim()) {
-      alert("Message cannot be empty");
+    if (!content.trim() && !imageUrl) {
+      alert("Message or image is required");
       return;
     }
 
@@ -48,7 +60,7 @@ export default function TeamChat({
       body: JSON.stringify({
         hubId,
         projectId,
-        content,
+        content: content || "Shared an image",
         imageUrl,
       }),
     });
@@ -56,6 +68,7 @@ export default function TeamChat({
     if (res.ok) {
       setContent("");
       setImageUrl("");
+      setShowImageOptions(false);
       router.refresh();
     } else {
       const data = await res.json();
@@ -74,10 +87,7 @@ export default function TeamChat({
           <p className="text-gray-500">No messages yet.</p>
         ) : (
           messages.map((message) => (
-            <div
-              key={message._id}
-              className="bg-white border rounded-xl p-3"
-            >
+            <div key={message._id} className="bg-white border rounded-xl p-3">
               <div className="flex items-center gap-3 mb-2">
                 {message.sender?.image && (
                   <img
@@ -104,12 +114,16 @@ export default function TeamChat({
                 <img
                   src={message.imageUrl}
                   alt="Shared image"
-                  className="mt-3 rounded-lg max-h-60 border"
+                  className="mt-3 rounded-lg max-h-72 border object-contain"
                 />
               )}
 
               <p className="text-xs text-gray-400 mt-2">
-                {new Date(message.createdAt).toLocaleString()}
+                { 
+                    new Date(message.createdAt).toLocaleString("en-IN", {
+                    dateStyle: "short",
+                    timeStyle: "medium",
+                })}
               </p>
             </div>
           ))
@@ -124,19 +138,75 @@ export default function TeamChat({
           onChange={(e) => setContent(e.target.value)}
         />
 
-        <input
-          className="border rounded-lg px-3 py-2 w-full"
-          placeholder="Optional image URL"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-        />
+        {imageUrl && (
+          <div className="border rounded-xl p-3">
+            <p className="text-sm text-gray-500 mb-2">Image preview</p>
 
-        <button
-          disabled={loading}
-          className="bg-black text-white px-4 py-2 rounded-lg disabled:opacity-50"
-        >
-          {loading ? "Sending..." : "Send Message"}
-        </button>
+            <img
+              src={imageUrl}
+              alt="Preview"
+              className="max-h-48 rounded-lg border object-contain"
+            />
+
+            <button
+              type="button"
+              onClick={() => setImageUrl("")}
+              className="text-red-600 text-sm mt-2"
+            >
+              Remove image
+            </button>
+          </div>
+        )}
+
+        {showImageOptions && (
+          <div className="border rounded-xl p-3 space-y-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="border px-3 py-2 rounded-lg w-full text-left"
+            >
+              Upload image from device
+            </button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+
+                if (file) {
+                  handleDeviceImage(file);
+                }
+              }}
+            />
+
+            <input
+              className="border rounded-lg px-3 py-2 w-full"
+              placeholder="Paste image URL from web"
+              value={imageUrl.startsWith("data:") ? "" : imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+            />
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setShowImageOptions((prev) => !prev)}
+            className="border px-4 py-2 rounded-lg"
+          >
+            +
+          </button>
+
+          <button
+            disabled={loading}
+            className="bg-black text-white px-4 py-2 rounded-lg disabled:opacity-50"
+          >
+            {loading ? "Sending..." : "Send Message"}
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
     const { hubId, projectId, content, imageUrl } = await req.json();
 
-    if (!content || !content.trim()) {
+    if ((!content || !content.trim()) && !imageUrl) {
       return NextResponse.json(
         { message: "Message cannot be empty" },
         { status: 400 }
