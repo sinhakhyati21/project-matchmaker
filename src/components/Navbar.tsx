@@ -69,7 +69,7 @@ export default async function Navbar() {
       {/* Desktop Nav Links */}
       <div
         className="desktop-nav"
-        style={{ display: "flex", alignItems: "center", gap: 8 }}
+        style={{ alignItems: "center", gap: 8 }}
       >
         <Link
           href="/projects"
@@ -224,15 +224,6 @@ export default async function Navbar() {
           userImage={session?.user?.image || null}
         />
       </div>
-
-      <style>{`
-        .desktop-nav { display: flex; }
-        .mobile-nav { display: none; }
-        @media (max-width: 768px) {
-          .desktop-nav { display: none; }
-          .mobile-nav { display: flex; align-items: center; gap: 8px; }
-        }
-      `}</style>
     </nav>
   );
 }
