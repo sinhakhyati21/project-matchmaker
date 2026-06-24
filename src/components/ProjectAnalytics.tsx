@@ -2,6 +2,18 @@
 
 import { useState } from "react";
 
+type MemberActivity = {
+  name: string;
+  githubUsername?: string;
+  image?: string;
+  recentEvents: number;
+};
+
+type ExpenseTrend = {
+  date: string;
+  amount: number;
+};
+
 type Analytics = {
   taskStats: {
     total: number;
@@ -18,8 +30,10 @@ type Analytics = {
   expenses: {
     total: number;
     count: number;
+    trends: ExpenseTrend[];
   };
   members: number;
+  memberActivity: MemberActivity[];
 };
 
 export default function ProjectAnalytics({
@@ -48,6 +62,14 @@ export default function ProjectAnalytics({
     { key: "review", label: "Review", color: "#fbbf24", bg: "rgba(245,158,11,0.15)" },
     { key: "done", label: "Done", color: "#4ade80", bg: "rgba(34,197,94,0.15)" },
   ];
+
+  const maxTrend = analytics
+    ? Math.max(...(analytics.expenses.trends.map((t) => t.amount) || [1]))
+    : 1;
+
+  const maxActivity = analytics
+    ? Math.max(...(analytics.memberActivity.map((m) => m.recentEvents) || [1]))
+    : 1;
 
   return (
     <div
@@ -79,7 +101,7 @@ export default function ProjectAnalytics({
             Project Analytics
           </h3>
           <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
-            Task completion, team activity, expenses
+            Tasks · Activity · Expenses · Contributions
           </p>
         </div>
         <button
@@ -138,8 +160,6 @@ export default function ProjectAnalytics({
                 {analytics.taskStats.completionRate}%
               </span>
             </div>
-
-            {/* Progress Bar */}
             <div
               style={{
                 height: 8,
@@ -165,7 +185,6 @@ export default function ProjectAnalytics({
               />
             </div>
 
-            {/* Task breakdown */}
             <div
               style={{
                 display: "grid",
@@ -192,7 +211,9 @@ export default function ProjectAnalytics({
                       lineHeight: 1,
                     }}
                   >
-                    {analytics.taskStats[col.key as keyof typeof analytics.taskStats]}
+                    {analytics.taskStats[
+                      col.key as keyof typeof analytics.taskStats
+                    ]}
                   </p>
                   <p
                     style={{
@@ -208,16 +229,11 @@ export default function ProjectAnalytics({
             </div>
           </div>
 
-          {/* Divider */}
           <div style={{ height: 1, background: "var(--border)" }} />
 
           {/* Team Activity + Expenses */}
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 16,
-            }}
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
           >
             {/* Team Activity */}
             <div
@@ -228,25 +244,12 @@ export default function ProjectAnalytics({
                 padding: 16,
               }}
             >
-              <p
-                style={{
-                  fontSize: 12,
-                  color: "var(--text-muted)",
-                  marginBottom: 8,
-                }}
-              >
+              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
                 Team Activity
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div>
-                  <p
-                    style={{
-                      fontSize: 22,
-                      fontWeight: 800,
-                      color: "#22d3ee",
-                      lineHeight: 1,
-                    }}
-                  >
+                  <p style={{ fontSize: 22, fontWeight: 800, color: "#22d3ee", lineHeight: 1 }}>
                     {analytics.messages.last7Days}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
@@ -254,13 +257,7 @@ export default function ProjectAnalytics({
                   </p>
                 </div>
                 <div>
-                  <p
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: "var(--text-primary)",
-                    }}
-                  >
+                  <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>
                     {analytics.messages.total}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
@@ -268,13 +265,7 @@ export default function ProjectAnalytics({
                   </p>
                 </div>
                 <div>
-                  <p
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: "var(--text-primary)",
-                    }}
-                  >
+                  <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>
                     {analytics.members}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
@@ -293,25 +284,12 @@ export default function ProjectAnalytics({
                 padding: 16,
               }}
             >
-              <p
-                style={{
-                  fontSize: 12,
-                  color: "var(--text-muted)",
-                  marginBottom: 8,
-                }}
-              >
+              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
                 Project Expenses
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <div>
-                  <p
-                    style={{
-                      fontSize: 22,
-                      fontWeight: 800,
-                      color: "#818cf8",
-                      lineHeight: 1,
-                    }}
-                  >
+                  <p style={{ fontSize: 22, fontWeight: 800, color: "#818cf8", lineHeight: 1 }}>
                     ₹{analytics.expenses.total.toFixed(0)}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
@@ -319,13 +297,7 @@ export default function ProjectAnalytics({
                   </p>
                 </div>
                 <div>
-                  <p
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: "var(--text-primary)",
-                    }}
-                  >
+                  <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>
                     {analytics.expenses.count}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
@@ -333,18 +305,9 @@ export default function ProjectAnalytics({
                   </p>
                 </div>
                 <div>
-                  <p
-                    style={{
-                      fontSize: 16,
-                      fontWeight: 700,
-                      color: "var(--text-primary)",
-                    }}
-                  >
-                    ₹
-                    {analytics.expenses.count > 0
-                      ? (
-                          analytics.expenses.total / analytics.expenses.count
-                        ).toFixed(0)
+                  <p style={{ fontSize: 16, fontWeight: 700, color: "var(--text-primary)" }}>
+                    ₹{analytics.expenses.count > 0
+                      ? (analytics.expenses.total / analytics.expenses.count).toFixed(0)
                       : 0}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
@@ -355,7 +318,168 @@ export default function ProjectAnalytics({
             </div>
           </div>
 
-          {/* Project Progress Summary */}
+          <div style={{ height: 1, background: "var(--border)" }} />
+
+          {/* Expense Trends */}
+          {analytics.expenses.trends.length > 0 && (
+            <div>
+              <h4
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                  marginBottom: 12,
+                }}
+              >
+                Expense Trends
+              </h4>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {analytics.expenses.trends.map((trend) => {
+                  const pct = Math.round((trend.amount / maxTrend) * 100);
+                  return (
+                    <div
+                      key={trend.date}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: "var(--text-muted)",
+                          width: 60,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {trend.date}
+                      </span>
+                      <div
+                        style={{
+                          flex: 1,
+                          height: 6,
+                          background: "var(--border)",
+                          borderRadius: 9999,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${pct}%`,
+                            background: "#818cf8",
+                            borderRadius: 9999,
+                          }}
+                        />
+                      </div>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: "#818cf8",
+                          fontWeight: 600,
+                          width: 60,
+                          textAlign: "right",
+                          flexShrink: 0,
+                        }}
+                      >
+                        ₹{trend.amount.toFixed(0)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div style={{ height: 1, background: "var(--border)" }} />
+
+          {/* Contribution Statistics */}
+          <div>
+            <h4
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                color: "var(--text-primary)",
+                marginBottom: 4,
+              }}
+            >
+              Contribution Statistics
+            </h4>
+            <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 12 }}>
+              Recent GitHub activity per member (last 30 events)
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {analytics.memberActivity.map((member) => {
+                const pct =
+                  maxActivity > 0
+                    ? Math.round((member.recentEvents / maxActivity) * 100)
+                    : 0;
+                const activityColor =
+                  member.recentEvents >= 20
+                    ? "#4ade80"
+                    : member.recentEvents >= 10
+                    ? "#fbbf24"
+                    : "#818cf8";
+
+                return (
+                  <div key={member.githubUsername} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    {member.image && (
+                      <img
+                        src={member.image}
+                        alt={member.name}
+                        style={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: "50%",
+                          border: "1px solid var(--border)",
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: 4,
+                        }}
+                      >
+                        <span style={{ fontSize: 12, color: "var(--text-primary)", fontWeight: 500 }}>
+                          {member.name}
+                        </span>
+                        <span style={{ fontSize: 12, color: activityColor, fontWeight: 600 }}>
+                          {member.recentEvents} events
+                        </span>
+                      </div>
+                      <div
+                        style={{
+                          height: 5,
+                          background: "var(--border)",
+                          borderRadius: 9999,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${pct}%`,
+                            background: activityColor,
+                            borderRadius: 9999,
+                            transition: "width 0.5s ease",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{ height: 1, background: "var(--border)" }} />
+
+          {/* Project Health */}
           <div
             style={{
               background: "rgba(34,197,94,0.05)",
@@ -364,13 +488,7 @@ export default function ProjectAnalytics({
               padding: 16,
             }}
           >
-            <p
-              style={{
-                fontSize: 12,
-                color: "var(--text-muted)",
-                marginBottom: 8,
-              }}
-            >
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
               Project Health
             </p>
             <div
@@ -402,13 +520,7 @@ export default function ProjectAnalytics({
                 },
               ].map((item) => (
                 <div key={item.label}>
-                  <p
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 800,
-                      color: item.color,
-                    }}
-                  >
+                  <p style={{ fontSize: 18, fontWeight: 800, color: item.color }}>
                     {item.value}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
