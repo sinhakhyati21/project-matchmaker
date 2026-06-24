@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type Member = {
   _id: string;
@@ -11,15 +12,16 @@ type Member = {
 
 export default function ReviewForm({
   projectId,
+  projectStatus,
   members,
   currentUserId,
 }: {
   projectId: string;
+  projectStatus: string;
   members: Member[];
   currentUserId: string;
 }) {
   const router = useRouter();
-
   const [revieweeId, setRevieweeId] = useState("");
   const [communication, setCommunication] = useState(5);
   const [technicalSkills, setTechnicalSkills] = useState(5);
@@ -28,21 +30,21 @@ export default function ReviewForm({
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const reviewableMembers = members.filter(
+    (member) => member._id !== currentUserId
+  );
+
   async function submitReview(e: React.FormEvent) {
     e.preventDefault();
-
     if (!revieweeId) {
-      alert("Select a teammate to review");
+      toast.error("Please select a teammate to review");
       return;
     }
 
     setLoading(true);
-
     const res = await fetch("/api/reviews", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         projectId,
         revieweeId,
@@ -55,8 +57,8 @@ export default function ReviewForm({
     });
 
     const data = await res.json();
-
     if (res.ok) {
+      toast.success("Review submitted!");
       setRevieweeId("");
       setCommunication(5);
       setTechnicalSkills(5);
@@ -65,25 +67,26 @@ export default function ReviewForm({
       setComment("");
       router.refresh();
     } else {
-      alert(data.message || "Failed to submit review");
+      toast.error(data.message || "Failed to submit review");
     }
-
     setLoading(false);
   }
 
-//   const reviewableMembers = members.filter(
-//     (member) => member._id !== currentUserId
-//   );
+  // Show message if project not completed
+  if (projectStatus !== "COMPLETED") {
+    return (
+      <div className="border rounded-xl p-5 bg-gray-50">
+        <h2 className="text-2xl font-bold">Review Teammates</h2>
+        <p className="text-gray-500 mt-2">
+          Reviews will be unlocked when the project is marked as{" "}
+          <span className="font-semibold text-green-600">Completed</span>.
+        </p>
+      </div>
+    );
+  }
 
-const reviewableMembers =
-  process.env.NODE_ENV === "development"
-    ? members
-    : members.filter((member) => member._id !== currentUserId);
   return (
-    <form
-      onSubmit={submitReview}
-      className="border rounded-xl p-5 space-y-4"
-    >
+    <form onSubmit={submitReview} className="border rounded-xl p-5 space-y-4">
       <h2 className="text-2xl font-bold">Review Teammate</h2>
 
       <select
@@ -92,7 +95,6 @@ const reviewableMembers =
         className="border rounded-lg px-3 py-2 w-full"
       >
         <option value="">Select teammate</option>
-
         {reviewableMembers.map((member) => (
           <option key={member._id} value={member._id}>
             {member.name || member.githubUsername || "Unknown"}
@@ -105,19 +107,16 @@ const reviewableMembers =
         value={communication}
         onChange={setCommunication}
       />
-
       <RatingInput
         label="Technical Skills"
         value={technicalSkills}
         onChange={setTechnicalSkills}
       />
-
       <RatingInput
         label="Reliability"
         value={reliability}
         onChange={setReliability}
       />
-
       <RatingInput
         label="Teamwork"
         value={teamwork}
@@ -153,7 +152,6 @@ function RatingInput({
   return (
     <div>
       <label className="font-medium">{label}</label>
-
       <select
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}

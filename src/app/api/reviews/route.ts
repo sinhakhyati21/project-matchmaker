@@ -3,6 +3,7 @@ import { auth } from "../../../auth";
 import { connectDB } from "../../../lib/db";
 import Review from "../../../models/Review.model";
 import Hub from "../../../models/Hub.model";
+import Project from "../../../models/Project.model";
 
 export async function POST(req: Request) {
   try {
@@ -37,6 +38,22 @@ export async function POST(req: Request) {
 
     await connectDB();
 
+    // Check project is completed
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return NextResponse.json(
+        { message: "Project not found" },
+        { status: 404 }
+      );
+    }
+
+    if (project.status !== "COMPLETED") {
+      return NextResponse.json(
+        { message: "Reviews are only available for completed projects" },
+        { status: 400 }
+      );
+    }
+
     const hub = await Hub.findOne({ project: projectId });
     if (!hub) {
       return NextResponse.json({ message: "Hub not found" }, { status: 404 });
@@ -69,6 +86,9 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    return NextResponse.json({ message: "Failed to create review" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to create review" },
+      { status: 500 }
+    );
   }
 }

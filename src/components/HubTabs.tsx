@@ -143,6 +143,7 @@ export default function HubTabs({
       <Tabs.Content value="reviews" className="space-y-6">
         <ReviewForm
           projectId={hub.project._id}
+          projectStatus={hub.project.status}
           members={hub.members}
           currentUserId={currentUserId}
         />
