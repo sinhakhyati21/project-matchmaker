@@ -23,8 +23,11 @@ export default function RootLayout({
               (function() {
                 try {
                   var theme = localStorage.getItem('theme');
-                  if (theme === 'light') {
+                  if (theme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                  } else {
                     document.documentElement.setAttribute('data-theme', 'light');
+                    if (!theme) localStorage.setItem('theme', 'light');
                   }
                 } catch(e) {}
               })();

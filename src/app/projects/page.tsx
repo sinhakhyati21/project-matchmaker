@@ -16,21 +16,6 @@ export default async function ProjectsPage() {
 
       {/* Header */}
       <div style={{ marginBottom: 40 }}>
-        <span
-          style={{
-            display: "inline-block",
-            background: "rgba(99,102,241,0.15)",
-            color: "#818cf8",
-            border: "1px solid rgba(99,102,241,0.3)",
-            padding: "4px 14px",
-            borderRadius: 9999,
-            fontSize: 12,
-            fontWeight: 600,
-            marginBottom: 16,
-          }}
-        >
-          🔍 Discover
-        </span>
         <h1
           style={{
             fontSize: 36,

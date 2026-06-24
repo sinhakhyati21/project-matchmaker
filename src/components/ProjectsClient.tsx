@@ -93,9 +93,22 @@ export default function ProjectsClient({
         </select>
       </div>
 
-      {/* Results count */}
-      <p className="text-sm text-gray-500">
-        Showing {filtered.length} of {projects.length} projects
+      {/* Results Count */}
+        <p
+          style={{
+            fontSize: 13,
+            color: "var(--text-muted)",
+            padding: "10px 0",
+            borderTop: "1px solid var(--border)",
+            borderBottom: "1px solid var(--border)",
+            marginTop: 4,
+          }}
+        >
+          Showing{" "}
+          <span style={{ color: "#6366f1", fontWeight: 600 }}>
+            {filtered.length}
+          </span>{" "}
+          of {projects.length} projects
       </p>
 
       {/* Project Grid */}
