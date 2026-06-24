@@ -4,7 +4,7 @@ import { connectDB } from "../../../../lib/db";
 import Project from "../../../../models/Project.model";
 
 export async function DELETE(
-  req: Request,
+  _req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
