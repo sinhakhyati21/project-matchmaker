@@ -1,9 +1,20 @@
 import Link from "next/link";
 import { auth } from "../auth";
 import SignOutButton from "./SignOutButton";
+import { connectDB } from "../lib/db";
+import Invitation from "../models/Invitation.model";
 
 export default async function Navbar() {
   const session = await auth();
+
+  let pendingInvitations = 0;
+  if (session) {
+    await connectDB();
+    pendingInvitations = await Invitation.countDocuments({
+      receiver: session.user.id,
+      status: "PENDING",
+    });
+  }
 
   return (
     <nav
@@ -54,13 +65,7 @@ export default async function Navbar() {
       </Link>
 
       {/* Nav Links */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-        }}
-      >
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <Link
           href="/projects"
           style={{
@@ -70,7 +75,6 @@ export default async function Navbar() {
             fontWeight: 500,
             padding: "6px 12px",
             borderRadius: 8,
-            transition: "all 0.2s",
           }}
         >
           Projects
@@ -87,7 +91,6 @@ export default async function Navbar() {
                 fontWeight: 500,
                 padding: "6px 12px",
                 borderRadius: 8,
-                transition: "all 0.2s",
               }}
             >
               Create
@@ -118,6 +121,8 @@ export default async function Navbar() {
             >
               Profile
             </Link>
+
+            {/* Invitations with badge */}
             <Link
               href="/invitations"
               style={{
@@ -127,15 +132,45 @@ export default async function Navbar() {
                 fontWeight: 500,
                 padding: "6px 12px",
                 borderRadius: 8,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                position: "relative",
               }}
             >
               Invitations
+              {pendingInvitations > 0 && (
+                <span
+                  style={{
+                    background: "#ef4444",
+                    color: "white",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    width: 18,
+                    height: 18,
+                    borderRadius: "50%",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    lineHeight: 1,
+                  }}
+                >
+                  {pendingInvitations > 9 ? "9+" : pendingInvitations}
+                </span>
+              )}
             </Link>
           </>
         )}
 
         {session ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              marginLeft: 8,
+            }}
+          >
             {session.user?.image && (
               <img
                 src={session.user.image}
