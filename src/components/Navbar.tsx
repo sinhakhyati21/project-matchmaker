@@ -3,6 +3,8 @@ import { auth } from "../auth";
 import SignOutButton from "./SignOutButton";
 import { connectDB } from "../lib/db";
 import Invitation from "../models/Invitation.model";
+import ThemeToggle from "./ThemeToggle";
+import MobileNav from "./MobileNav";
 
 export default async function Navbar() {
   const session = await auth();
@@ -19,7 +21,7 @@ export default async function Navbar() {
   return (
     <nav
       style={{
-        background: "rgba(15,15,16,0.8)",
+        background: "var(--surface)",
         backdropFilter: "blur(12px)",
         borderBottom: "1px solid var(--border)",
         padding: "0 24px",
@@ -64,8 +66,11 @@ export default async function Navbar() {
         <span>Project Matchmaker</span>
       </Link>
 
-      {/* Nav Links */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      {/* Desktop Nav Links */}
+      <div
+        className="desktop-nav"
+        style={{ display: "flex", alignItems: "center", gap: 8 }}
+      >
         <Link
           href="/projects"
           style={{
@@ -121,8 +126,6 @@ export default async function Navbar() {
             >
               Profile
             </Link>
-
-            {/* Invitations with badge */}
             <Link
               href="/invitations"
               style={{
@@ -135,7 +138,6 @@ export default async function Navbar() {
                 display: "flex",
                 alignItems: "center",
                 gap: 6,
-                position: "relative",
               }}
             >
               Invitations
@@ -183,26 +185,54 @@ export default async function Navbar() {
                 }}
               />
             )}
+            <ThemeToggle />
             <SignOutButton />
           </div>
         ) : (
-          <Link
-            href="/signin"
+          <div
             style={{
-              background: "#6366f1",
-              color: "white",
-              textDecoration: "none",
-              fontSize: 14,
-              fontWeight: 600,
-              padding: "8px 16px",
-              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
               marginLeft: 8,
             }}
           >
-            Sign In
-          </Link>
+            <ThemeToggle />
+            <Link
+              href="/signin"
+              style={{
+                background: "#6366f1",
+                color: "white",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: 600,
+                padding: "8px 16px",
+                borderRadius: 8,
+              }}
+            >
+              Sign In
+            </Link>
+          </div>
         )}
       </div>
+
+      {/* Mobile Nav */}
+      <div className="mobile-nav">
+        <MobileNav
+          session={!!session}
+          pendingInvitations={pendingInvitations}
+          userImage={session?.user?.image || null}
+        />
+      </div>
+
+      <style>{`
+        .desktop-nav { display: flex; }
+        .mobile-nav { display: none; }
+        @media (max-width: 768px) {
+          .desktop-nav { display: none; }
+          .mobile-nav { display: flex; align-items: center; gap: 8px; }
+        }
+      `}</style>
     </nav>
   );
 }

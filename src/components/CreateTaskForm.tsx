@@ -42,24 +42,65 @@ export default function CreateTaskForm({
     setLoading(false);
   }
 
+  const inputStyle = {
+    width: "100%",
+    background: "var(--background)",
+    border: "1px solid var(--border)",
+    color: "var(--text-primary)",
+    borderRadius: 8,
+    padding: "10px 14px",
+    fontSize: 14,
+    outline: "none",
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="border rounded-xl p-4 space-y-3">
-      <h3 className="font-bold">Create Task</h3>
+    <form
+      onSubmit={handleSubmit}
+      style={{
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        borderRadius: 12,
+        padding: "20px 24px",
+        display: "flex",
+        flexDirection: "column" as const,
+        gap: 12,
+      }}
+    >
+      <h3
+        style={{
+          fontSize: 15,
+          fontWeight: 700,
+          color: "var(--text-primary)",
+          marginBottom: 4,
+        }}
+      >
+        Create Task
+      </h3>
       <input
-        className="border rounded-lg px-3 py-2 w-full"
+        style={inputStyle}
         placeholder="Task title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
       />
       <textarea
-        className="border rounded-lg px-3 py-2 w-full"
+        style={{ ...inputStyle, minHeight: 60, resize: "vertical" as const }}
         placeholder="Task description (optional)"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
       <button
         disabled={loading}
-        className="bg-black text-white px-4 py-2 rounded-lg disabled:opacity-50"
+        style={{
+          background: loading ? "var(--border)" : "#6366f1",
+          color: "white",
+          border: "none",
+          padding: "10px 20px",
+          borderRadius: 8,
+          fontSize: 14,
+          fontWeight: 600,
+          cursor: loading ? "not-allowed" : "pointer",
+          alignSelf: "flex-start" as const,
+        }}
       >
         {loading ? "Creating..." : "Create Task"}
       </button>

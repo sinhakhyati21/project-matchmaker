@@ -72,27 +72,79 @@ export default function ReviewForm({
     setLoading(false);
   }
 
-  // Show message if project not completed
+  // Locked state — project not completed
   if (projectStatus !== "COMPLETED") {
     return (
-      <div className="border rounded-xl p-5 bg-gray-50">
-        <h2 className="text-2xl font-bold">Review Teammates</h2>
-        <p className="text-gray-500 mt-2">
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: 12,
+          padding: "24px 28px",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            marginBottom: 10,
+          }}
+        >
+          Review Teammates
+        </h2>
+        <p
+          style={{
+            fontSize: 14,
+            color: "var(--text-muted)",
+            lineHeight: 1.6,
+          }}
+        >
           Reviews will be unlocked when the project is marked as{" "}
-          <span className="font-semibold text-green-600">Completed</span>.
+          <span style={{ color: "#4ade80", fontWeight: 600 }}>Completed</span>.
         </p>
       </div>
     );
   }
 
+  const inputStyle = {
+    width: "100%",
+    background: "var(--background)",
+    border: "1px solid var(--border)",
+    color: "var(--text-primary)",
+    borderRadius: 8,
+    padding: "10px 14px",
+    fontSize: 14,
+    outline: "none",
+  };
+
   return (
-    <form onSubmit={submitReview} className="border rounded-xl p-5 space-y-4">
-      <h2 className="text-2xl font-bold">Review Teammate</h2>
+    <form
+      onSubmit={submitReview}
+      style={{
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        borderRadius: 12,
+        padding: "24px 28px",
+        display: "flex",
+        flexDirection: "column" as const,
+        gap: 16,
+      }}
+    >
+      <h2
+        style={{
+          fontSize: 16,
+          fontWeight: 700,
+          color: "var(--text-primary)",
+        }}
+      >
+        Review a Teammate
+      </h2>
 
       <select
         value={revieweeId}
         onChange={(e) => setRevieweeId(e.target.value)}
-        className="border rounded-lg px-3 py-2 w-full"
+        style={inputStyle}
       >
         <option value="">Select teammate</option>
         {reviewableMembers.map((member) => (
@@ -124,15 +176,29 @@ export default function ReviewForm({
       />
 
       <textarea
-        className="border rounded-lg px-3 py-2 w-full"
-        placeholder="Optional feedback"
+        style={{
+          ...inputStyle,
+          minHeight: 80,
+          resize: "vertical" as const,
+        }}
+        placeholder="Optional feedback..."
         value={comment}
         onChange={(e) => setComment(e.target.value)}
       />
 
       <button
         disabled={loading}
-        className="bg-black text-white px-4 py-2 rounded-lg disabled:opacity-50"
+        style={{
+          background: loading ? "var(--border)" : "#6366f1",
+          color: "white",
+          border: "none",
+          padding: "10px 20px",
+          borderRadius: 8,
+          fontSize: 14,
+          fontWeight: 600,
+          cursor: loading ? "not-allowed" : "pointer",
+          alignSelf: "flex-start" as const,
+        }}
       >
         {loading ? "Submitting..." : "Submit Review"}
       </button>
@@ -150,19 +216,44 @@ function RatingInput({
   onChange: (value: number) => void;
 }) {
   return (
-    <div>
-      <label className="font-medium">{label}</label>
-      <select
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="border rounded-lg px-3 py-2 w-full mt-1"
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <label
+        style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: "var(--text-primary)",
+        }}
       >
+        {label}
+      </label>
+      <div style={{ display: "flex", gap: 8 }}>
         {[1, 2, 3, 4, 5].map((rating) => (
-          <option key={rating} value={rating}>
+          <button
+            key={rating}
+            type="button"
+            onClick={() => onChange(rating)}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 8,
+              border: `1px solid ${
+                value === rating ? "#6366f1" : "var(--border)"
+              }`,
+              background:
+                value === rating
+                  ? "rgba(99,102,241,0.15)"
+                  : "var(--background)",
+              color: value === rating ? "#818cf8" : "var(--text-muted)",
+              fontWeight: value === rating ? 700 : 400,
+              fontSize: 14,
+              cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+          >
             {rating}
-          </option>
+          </button>
         ))}
-      </select>
+      </div>
     </div>
   );
 }

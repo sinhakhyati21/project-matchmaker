@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 type Message = {
   _id: string;
@@ -18,64 +18,74 @@ type Message = {
 export default function TeamChat({
   hubId,
   projectId,
-  messages,
+  messages: initialMessages,
 }: {
   hubId: string;
   projectId: string;
   messages: Message[];
 }) {
-  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const [chatMessages, setChatMessages] =
-    useState<Message[]>(messages);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const [chatMessages, setChatMessages] = useState<Message[]>(initialMessages);
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [showImageOptions, setShowImageOptions] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  async function fetchMessages() {
-    const res = await fetch(`/api/messages?hubId=${hubId}`);
-
-    if (res.ok) {
-      const data = await res.json();
-      setChatMessages(data);
-    }
-  }
+  // SSE connection
+  useEffect(() => {
+    const es = new EventSource(`/api/messages/stream?hubId=${hubId}`);
+    es.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      if (data.type === "init") {
+        setChatMessages(data.messages);
+      } else if (data.type === "message") {
+        setChatMessages((prev) => {
+          const exists = prev.some((m) => m._id === data.message._id);
+          if (exists) return prev;
+          return [...prev, data.message];
+        });
+      } else if (data.type === "typing") {
+        setIsTyping(true);
+        setTimeout(() => setIsTyping(false), 3000);
+      }
+    };
+    es.onerror = () => es.close();
+    return () => es.close();
+  }, [hubId]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchMessages();
-    }, 5000);
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
 
-    return () => clearInterval(interval);
-  }, [hubId]);
+  function handleTyping() {
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    fetch(`/api/messages/typing`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hubId }),
+    });
+    typingTimeout.current = setTimeout(() => {}, 2000);
+  }
 
   function handleDeviceImage(file: File) {
     const reader = new FileReader();
-
-    reader.onloadend = () => {
-      setImageUrl(reader.result as string);
-    };
-
+    reader.onloadend = () => setImageUrl(reader.result as string);
     reader.readAsDataURL(file);
   }
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
-
     if (!content.trim() && !imageUrl) {
-      alert("Message or image is required");
+      toast.error("Message or image is required");
       return;
     }
-
     setLoading(true);
-
     const res = await fetch("/api/messages", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         hubId,
         projectId,
@@ -83,65 +93,121 @@ export default function TeamChat({
         imageUrl,
       }),
     });
-
     if (res.ok) {
       setContent("");
       setImageUrl("");
       setShowImageOptions(false);
-      await fetchMessages();
-      router.refresh();
     } else {
       const data = await res.json();
-      alert(data.message || "Failed to send message");
+      toast.error(data.message || "Failed to send message");
     }
-
     setLoading(false);
   }
 
-  return (
-    <div className="border rounded-xl p-5 space-y-4">
-      <h2 className="text-2xl font-bold">Team Chat</h2>
+  const inputStyle = {
+    width: "100%",
+    background: "var(--background)",
+    border: "1px solid var(--border)",
+    color: "var(--text-primary)",
+    borderRadius: 8,
+    padding: "10px 14px",
+    fontSize: 14,
+    outline: "none",
+  };
 
-      <div className="space-y-3 max-h-96 overflow-y-auto border rounded-xl p-4 bg-gray-50">
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+      }}
+    >
+      {/* Messages */}
+      <div
+        style={{
+          background: "var(--background)",
+          border: "1px solid var(--border)",
+          borderRadius: 12,
+          padding: 16,
+          maxHeight: 420,
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
+      >
         {chatMessages.length === 0 ? (
-          <p className="text-gray-500">No messages yet.</p>
+          <p style={{ color: "var(--text-muted)", fontSize: 14, textAlign: "center", padding: "20px 0" }}>
+            No messages yet. Say hello!
+          </p>
         ) : (
           chatMessages.map((message) => (
             <div
               key={message._id}
-              className="bg-white border rounded-xl p-3"
+              style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: 10,
+                padding: "12px 14px",
+              }}
             >
-              <div className="flex items-center gap-3 mb-2">
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 8,
+                }}
+              >
                 {message.sender?.image && (
                   <img
                     src={message.sender.image}
                     alt={message.sender?.name || "User"}
-                    className="w-8 h-8 rounded-full"
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      border: "1px solid var(--border)",
+                      flexShrink: 0,
+                    }}
                   />
                 )}
-
                 <div>
-                  <p className="font-semibold">
-                    {message.sender?.name || "Unknown User"}
+                  <p
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "var(--text-primary)",
+                    }}
+                  >
+                    {message.sender?.name || "Unknown"}
                   </p>
-
-                  <p className="text-xs text-gray-500">
+                  <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
                     @{message.sender?.githubUsername || "github"}
                   </p>
                 </div>
               </div>
 
-              <p>{message.content}</p>
+              <p style={{ fontSize: 14, color: "var(--text-primary)", lineHeight: 1.5 }}>
+                {message.content}
+              </p>
 
               {message.imageUrl && (
                 <img
                   src={message.imageUrl}
-                  alt="Shared image"
-                  className="mt-3 rounded-lg max-h-72 border object-contain"
+                  alt="Shared"
+                  style={{
+                    marginTop: 10,
+                    borderRadius: 8,
+                    maxHeight: 280,
+                    border: "1px solid var(--border)",
+                    objectFit: "contain",
+                  }}
                 />
               )}
 
-              <p className="text-xs text-gray-400 mt-2">
+              <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
                 {new Date(message.createdAt).toLocaleString("en-IN", {
                   dateStyle: "short",
                   timeStyle: "medium",
@@ -150,32 +216,87 @@ export default function TeamChat({
             </div>
           ))
         )}
+
+        {isTyping && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "0 4px",
+            }}
+          >
+            <span style={{ display: "flex", gap: 3 }}>
+              {[0, 150, 300].map((delay) => (
+                <span
+                  key={delay}
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "var(--text-muted)",
+                    display: "inline-block",
+                    animation: "bounce 1s infinite",
+                    animationDelay: `${delay}ms`,
+                  }}
+                />
+              ))}
+            </span>
+            <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+              Someone is typing...
+            </span>
+          </div>
+        )}
+
+        <div ref={bottomRef} />
       </div>
 
-      <form onSubmit={sendMessage} className="space-y-3">
+      {/* Input Form */}
+      <form onSubmit={sendMessage} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <textarea
-          className="border rounded-lg px-3 py-2 w-full"
+          style={{ ...inputStyle, minHeight: 72, resize: "vertical" as const }}
           placeholder="Type a message..."
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e) => {
+            setContent(e.target.value);
+            handleTyping();
+          }}
         />
 
         {imageUrl && (
-          <div className="border rounded-xl p-3">
-            <p className="text-sm text-gray-500 mb-2">
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: 10,
+              padding: 12,
+            }}
+          >
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
               Image preview
             </p>
-
             <img
               src={imageUrl}
               alt="Preview"
-              className="max-h-48 rounded-lg border object-contain"
+              style={{
+                maxHeight: 180,
+                borderRadius: 8,
+                border: "1px solid var(--border)",
+                objectFit: "contain",
+              }}
             />
-
             <button
               type="button"
               onClick={() => setImageUrl("")}
-              className="text-red-600 text-sm mt-2"
+              style={{
+                background: "none",
+                border: "none",
+                color: "#f87171",
+                fontSize: 13,
+                cursor: "pointer",
+                marginTop: 8,
+                padding: 0,
+              }}
             >
               Remove image
             </button>
@@ -183,52 +304,88 @@ export default function TeamChat({
         )}
 
         {showImageOptions && (
-          <div className="border rounded-xl p-3 space-y-3">
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: 10,
+              padding: 12,
+              display: "flex",
+              flexDirection: "column" as const,
+              gap: 8,
+            }}
+          >
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="border px-3 py-2 rounded-lg w-full text-left"
+              style={{
+                background: "var(--background)",
+                border: "1px solid var(--border)",
+                color: "var(--text-primary)",
+                padding: "8px 14px",
+                borderRadius: 8,
+                fontSize: 13,
+                cursor: "pointer",
+                textAlign: "left" as const,
+              }}
             >
               Upload image from device
             </button>
-
             <input
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              className="hidden"
+              style={{ display: "none" }}
               onChange={(e) => {
                 const file = e.target.files?.[0];
-
-                if (file) {
-                  handleDeviceImage(file);
-                }
+                if (file) handleDeviceImage(file);
               }}
             />
-
             <input
-              className="border rounded-lg px-3 py-2 w-full"
-              placeholder="Paste image URL from web"
+              style={inputStyle}
+              placeholder="Or paste image URL..."
               value={imageUrl.startsWith("data:") ? "" : imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
             />
           </div>
         )}
 
-        <div className="flex gap-2">
+        <div style={{ display: "flex", gap: 8 }}>
           <button
             type="button"
-            onClick={() => setShowImageOptions((prev) => !prev)}
-            className="border px-4 py-2 rounded-lg"
+            onClick={() => setShowImageOptions((p) => !p)}
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              color: "var(--text-muted)",
+              width: 40,
+              height: 40,
+              borderRadius: 8,
+              fontSize: 18,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
           >
             +
           </button>
-
           <button
             disabled={loading}
-            className="bg-black text-white px-4 py-2 rounded-lg disabled:opacity-50"
+            style={{
+              background: loading ? "var(--border)" : "#6366f1",
+              color: "white",
+              border: "none",
+              padding: "10px 20px",
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: loading ? "not-allowed" : "pointer",
+              flex: 1,
+            }}
           >
-            {loading ? "Sending..." : "Send Message"}
+            {loading ? "Sending..." : "Send"}
           </button>
         </div>
       </form>

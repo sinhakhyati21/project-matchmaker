@@ -31,6 +31,7 @@ export default function TeamRecommendations({
   const [loading, setLoading] = useState(false);
   const [invitedIds, setInvitedIds] = useState<string[]>([]);
   const [invitingId, setInvitingId] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   async function fetchRecommendations() {
     setLoading(true);
@@ -43,7 +44,9 @@ export default function TeamRecommendations({
     if (res.ok) {
       const data = await res.json();
       if (data.length === 0) {
-        toast.error("No matching candidates found. Try adding more skills to your project.");
+        toast.error("No matching candidates found.");
+      } else {
+        setExpanded(true);
       }
       setRecommendations(data);
     } else {
@@ -72,86 +75,158 @@ export default function TeamRecommendations({
   }
 
   return (
-    <div className="border rounded-xl p-5 space-y-4 mt-4">
-      <div className="flex justify-between gap-4 items-center">
+    <div
+      style={{
+        border: "1px solid var(--border)",
+        borderRadius: 10,
+        overflow: "hidden",
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "12px 16px",
+          background: "var(--background)",
+        }}
+      >
         <div>
-          <h3 className="font-bold text-lg">AI Team Recommendations</h3>
-          <p className="text-sm text-gray-500">
-            Ranked by skill match + GitHub activity + trust score
+          <p
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--text-primary)",
+              marginBottom: 2,
+            }}
+          >
+            AI Team Recommendations
+          </p>
+          <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
+            Skill match · GitHub activity · Trust score
           </p>
         </div>
         <button
           onClick={fetchRecommendations}
           disabled={loading}
-          className="bg-black text-white px-4 py-2 rounded-lg disabled:opacity-50"
+          style={{
+            background: "#6366f1",
+            color: "white",
+            border: "none",
+            padding: "6px 14px",
+            borderRadius: 6,
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: loading ? "not-allowed" : "pointer",
+            opacity: loading ? 0.6 : 1,
+            whiteSpace: "nowrap",
+          }}
         >
           {loading ? "Finding..." : "Find Teammates"}
         </button>
       </div>
 
-      {recommendations.length === 0 ? (
-        <p className="text-sm text-gray-500">
-          No recommendations loaded yet. Click Find Teammates.
-        </p>
-      ) : (
-        <div className="space-y-3">
+      {/* Results */}
+      {recommendations.length > 0 && expanded && (
+        <div
+          style={{
+            borderTop: "1px solid var(--border)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+          }}
+        >
           {recommendations.map((user) => (
             <div
               key={user._id}
-              className="border rounded-xl p-4 space-y-3"
+              style={{
+                padding: "12px 16px",
+                background: "var(--surface)",
+                borderBottom: "1px solid var(--border)",
+              }}
             >
-              <div className="flex justify-between gap-4">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: 12,
+                  marginBottom: 10,
+                }}
+              >
                 {/* Left: User Info */}
-                <div className="flex gap-3">
+                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                   {user.image && (
                     <img
                       src={user.image}
                       alt={user.name}
-                      className="w-12 h-12 rounded-full"
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: "50%",
+                        border: "1px solid var(--border)",
+                        flexShrink: 0,
+                      }}
                     />
                   )}
                   <div>
-                    <h4 className="font-bold">{user.name}</h4>
-                    <p className="text-sm text-gray-500">
+                    <p
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: "var(--text-primary)",
+                        marginBottom: 2,
+                      }}
+                    >
+                      {user.name}
+                    </p>
+                    <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
                       @{user.githubUsername || "github"}
                     </p>
-                    <p className="text-sm mt-1">
-                      {user.status?.replaceAll("_", " ") || "Unknown"}
-                    </p>
-                    <p className="text-sm mt-1">
-                      Matched:{" "}
-                      {user.matchedSkills.length > 0
-                        ? user.matchedSkills.join(", ")
-                        : "No skill match"}
-                    </p>
+                    {user.matchedSkills.length > 0 && (
+                      <p style={{ fontSize: 11, color: "#818cf8", marginTop: 3 }}>
+                        ✓ {user.matchedSkills.join(", ")}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 {/* Right: Score */}
-<div className="text-right min-w-[120px]">
-  <p className="font-bold text-2xl text-indigo-600">
-    {user.score}
-  </p>
-  <p className="text-xs text-gray-500">total score</p>
-  <p className="text-xs mt-1 text-gray-500">
-    Skills: {user.skillScore}/80
-  </p>
-  <p className="text-xs text-gray-500">
-    Activity: {user.activityScore}/20
-  </p>
-  <p className="text-xs text-gray-500">
-    Repos: {user.repoScore}/20
-  </p>
-  <p className="text-xs text-gray-500">
-    Experience: {user.experienceScore}/10
-  </p>
-  <p className="text-xs mt-1">
-    Trust:{" "}
-    {user.trustScore.count === 0
-      ? "No reviews"
-      : `${user.trustScore.average}/5`}
-  </p>
-</div>
+                <div style={{ textAlign: "right", flexShrink: 0 }}>
+                  <p
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 800,
+                      color: "#6366f1",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {user.score}
+                  </p>
+                  <p style={{ fontSize: 10, color: "var(--text-muted)" }}>
+                    score
+                  </p>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      color: "var(--text-muted)",
+                      marginTop: 4,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    <div>Skills {user.skillScore}/80</div>
+                    <div>Activity {user.activityScore}/20</div>
+                    <div>Repos {user.repoScore}/20</div>
+                    <div>Exp {user.experienceScore}/10</div>
+                    <div>
+                      Trust:{" "}
+                      {user.trustScore.count === 0
+                        ? "—"
+                        : `${user.trustScore.average}/5`}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Invite Button */}
@@ -160,7 +235,28 @@ export default function TeamRecommendations({
                 disabled={
                   invitedIds.includes(user._id) || invitingId === user._id
                 }
-                className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 text-sm"
+                style={{
+                  width: "100%",
+                  background: invitedIds.includes(user._id)
+                    ? "rgba(34,197,94,0.1)"
+                    : "rgba(99,102,241,0.1)",
+                  color: invitedIds.includes(user._id) ? "#4ade80" : "#818cf8",
+                  border: `1px solid ${
+                    invitedIds.includes(user._id)
+                      ? "rgba(34,197,94,0.2)"
+                      : "rgba(99,102,241,0.2)"
+                  }`,
+                  padding: "6px 12px",
+                  borderRadius: 6,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor:
+                    invitedIds.includes(user._id) || invitingId === user._id
+                      ? "not-allowed"
+                      : "pointer",
+                  opacity:
+                    invitingId === user._id ? 0.6 : 1,
+                }}
               >
                 {invitedIds.includes(user._id)
                   ? "✓ Invitation Sent"
@@ -170,7 +266,42 @@ export default function TeamRecommendations({
               </button>
             </div>
           ))}
+
+          {/* Collapse button */}
+          <button
+            onClick={() => setExpanded(false)}
+            style={{
+              width: "100%",
+              padding: "8px",
+              background: "var(--background)",
+              border: "none",
+              fontSize: 11,
+              color: "var(--text-muted)",
+              cursor: "pointer",
+            }}
+          >
+            Hide recommendations
+          </button>
         </div>
+      )}
+
+      {recommendations.length > 0 && !expanded && (
+        <button
+          onClick={() => setExpanded(true)}
+          style={{
+            width: "100%",
+            padding: "8px",
+            background: "var(--background)",
+            border: "none",
+            borderTop: "1px solid var(--border)",
+            fontSize: 11,
+            color: "#818cf8",
+            cursor: "pointer",
+          }}
+        >
+          Show {recommendations.length} recommendation
+          {recommendations.length > 1 ? "s" : ""}
+        </button>
       )}
     </div>
   );

@@ -8,9 +8,11 @@ import GitHubSetupButton from "./GitHubSetupButton";
 export default function DashboardActions({
   projectId,
   projectStatus,
+  memberCount,
 }: {
   projectId: string;
   projectStatus: string;
+  memberCount: number;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -39,23 +41,28 @@ export default function DashboardActions({
   const canEdit =
     projectStatus !== "ACTIVE" && projectStatus !== "COMPLETED";
 
+  const hasHub = memberCount >= 2;
+
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
-      <button
-        onClick={() => router.push(`/hub/${projectId}`)}
-        style={{
-          background: "rgba(99,102,241,0.1)",
-          color: "#818cf8",
-          border: "1px solid rgba(99,102,241,0.3)",
-          padding: "7px 14px",
-          borderRadius: 8,
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: "pointer",
-        }}
-      >
-        Open Hub
-      </button>
+      {/* Open Hub — only show when team has 2+ members */}
+      {hasHub && (
+        <button
+          onClick={() => router.push(`/hub/${projectId}`)}
+          style={{
+            background: "rgba(99,102,241,0.1)",
+            color: "#818cf8",
+            border: "1px solid rgba(99,102,241,0.2)",
+            padding: "7px 14px",
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          Open Hub
+        </button>
+      )}
 
       {canEdit && (
         <button
@@ -82,7 +89,7 @@ export default function DashboardActions({
           style={{
             background: "rgba(239,68,68,0.1)",
             color: "#f87171",
-            border: "1px solid rgba(239,68,68,0.3)",
+            border: "1px solid rgba(239,68,68,0.2)",
             padding: "7px 14px",
             borderRadius: 8,
             fontSize: 13,

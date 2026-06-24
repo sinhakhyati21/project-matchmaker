@@ -31,7 +31,8 @@ export default function ProjectForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    const finalCategory = category === "Other" ? customCategory.trim() : category;
+    const finalCategory =
+      category === "Other" ? customCategory.trim() : category;
 
     if (!title.trim()) { toast.error("Title is required"); return; }
     if (!description.trim()) { toast.error("Description is required"); return; }
@@ -47,8 +48,14 @@ export default function ProjectForm() {
           title,
           description,
           category: finalCategory,
-          requiredSkills: skills.split(",").map((s: string) => s.trim()).filter(Boolean),
-          requiredRoles: roles.split(",").map((r: string) => r.trim()).filter(Boolean),
+          requiredSkills: skills
+            .split(",")
+            .map((s: string) => s.trim())
+            .filter(Boolean),
+          requiredRoles: roles
+            .split(",")
+            .map((r: string) => r.trim())
+            .filter(Boolean),
           maxTeamSize: teamSize,
         }),
       });
@@ -77,7 +84,7 @@ export default function ProjectForm() {
 
   const inputStyle = {
     width: "100%",
-    background: "var(--surface)",
+    background: "var(--background)",
     border: "1px solid var(--border)",
     color: "var(--text-primary)",
     borderRadius: 8,
@@ -120,64 +127,69 @@ export default function ProjectForm() {
       <div>
         <label style={labelStyle}>Description *</label>
         <textarea
-          style={{ ...inputStyle, minHeight: 100, resize: "vertical" as const }}
+          style={{
+            ...inputStyle,
+            minHeight: 100,
+            resize: "vertical" as const,
+          }}
           placeholder="Describe your project idea, goals, and what you are building..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
 
-{/* Category */}
-<div>
-  <label style={labelStyle}>Category *</label>
-  <select
-    value={category}
-    onChange={(e) => {
-      const val = e.target.value;
-      setCategory(val);
-      if (val !== "Other") setCustomCategory("");
-    }}
-    style={{
-      width: "100%",
-      background: "#1a1a1f",
-      border: "1px solid #2a2a35",
-      color: "#f4f4f5",
-      borderRadius: 8,
-      padding: "10px 14px",
-      fontSize: 14,
-      outline: "none",
-      cursor: "pointer",
-      appearance: "auto",
-    }}
-  >
-    <option value="">Select a category</option>
-    {CATEGORIES.map((cat) => (
-      <option key={cat} value={cat} style={{ background: "#1a1a1f" }}>
-        {cat}
-      </option>
-    ))}
-  </select>
+      {/* Category */}
+      <div>
+        <label style={labelStyle}>Category *</label>
+        <select
+          value={category}
+          onChange={(e) => {
+            const val = e.target.value;
+            setCategory(val);
+            if (val !== "Other") setCustomCategory("");
+          }}
+          style={{
+            width: "100%",
+            background: "var(--background)",
+            border: "1px solid var(--border)",
+            color: "var(--text-primary)",
+            borderRadius: 8,
+            padding: "10px 14px",
+            fontSize: 14,
+            outline: "none",
+            cursor: "pointer",
+            appearance: "auto" as const,
+          }}
+        >
+          <option value="">Select a category</option>
+          {CATEGORIES.map((cat) => (
+            <option
+              key={cat}
+              value={cat}
+              style={{
+                background: "var(--background)",
+                color: "var(--text-primary)",
+              }}
+            >
+              {cat}
+            </option>
+          ))}
+        </select>
 
-  {category === "Other" && (
-    <input
-      style={{
-        width: "100%",
-        background: "#1a1a1f",
-        border: "1px solid #6366f1",
-        color: "#f4f4f5",
-        borderRadius: 8,
-        padding: "10px 14px",
-        fontSize: 14,
-        outline: "none",
-        marginTop: 8,
-      }}
-      placeholder="e.g. AR/VR, IoT, Cybersecurity..."
-      value={customCategory}
-      onChange={(e) => setCustomCategory(e.target.value)}
-      autoFocus
-    />
-  )}
-</div>
+        {category === "Other" && (
+          <input
+            style={{
+              ...inputStyle,
+              marginTop: 8,
+              border: "1px solid #6366f1",
+            }}
+            placeholder="e.g. AR/VR, IoT, Cybersecurity..."
+            value={customCategory}
+            onChange={(e) => setCustomCategory(e.target.value)}
+            autoFocus
+          />
+        )}
+      </div>
 
       {/* Required Skills */}
       <div>
@@ -230,6 +242,7 @@ export default function ProjectForm() {
           fontSize: 15,
           fontWeight: 700,
           cursor: loading ? "not-allowed" : "pointer",
+          transition: "all 0.2s",
           alignSelf: "flex-start" as const,
         }}
       >

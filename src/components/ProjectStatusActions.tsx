@@ -6,6 +6,13 @@ import { toast } from "sonner";
 
 type ProjectStatus = "RECRUITING" | "ACTIVE" | "COMPLETED" | "ARCHIVED";
 
+const ALL_STATUSES: ProjectStatus[] = [
+  "RECRUITING",
+  "ACTIVE",
+  "COMPLETED",
+  "ARCHIVED",
+];
+
 export default function ProjectStatusActions({
   projectId,
   currentStatus,
@@ -17,9 +24,7 @@ export default function ProjectStatusActions({
   const [loading, setLoading] = useState(false);
 
   async function updateStatus(status: ProjectStatus) {
-    const confirmed = window.confirm(
-      `Mark this project as ${status}?`
-    );
+    const confirmed = window.confirm(`Mark this project as ${status}?`);
     if (!confirmed) return;
 
     setLoading(true);
@@ -39,61 +44,46 @@ export default function ProjectStatusActions({
     setLoading(false);
   }
 
-  const buttonStyle = {
-    background: "transparent",
-    color: "var(--text-muted)",
-    border: "1px solid var(--border)",
-    padding: "5px 10px",
-    borderRadius: 6,
-    fontSize: 11,
-    fontWeight: 500,
-    cursor: "pointer",
-    transition: "all 0.2s",
-    textTransform: "uppercase" as const,
-    letterSpacing: "0.04em",
-  };
-
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-      <span style={{ fontSize: 11, color: "var(--text-muted)", alignSelf: "center" }}>
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        gap: 6,
+      }}
+    >
+      <span
+        style={{
+          fontSize: 11,
+          color: "var(--text-muted)",
+          marginRight: 2,
+        }}
+      >
         Move to:
       </span>
-      {currentStatus !== "RECRUITING" && (
+      {ALL_STATUSES.filter((s) => s !== currentStatus).map((status) => (
         <button
+          key={status}
           disabled={loading}
-          onClick={() => updateStatus("RECRUITING")}
-          style={buttonStyle}
+          onClick={() => updateStatus(status)}
+          style={{
+            background: "transparent",
+            color: "var(--text-muted)",
+            border: "1px solid var(--border)",
+            padding: "3px 8px",
+            borderRadius: 5,
+            fontSize: 10,
+            fontWeight: 500,
+            cursor: loading ? "not-allowed" : "pointer",
+            letterSpacing: "0.04em",
+            textTransform: "uppercase" as const,
+            opacity: loading ? 0.5 : 1,
+          }}
         >
-          Recruiting
+          {status}
         </button>
-      )}
-      {currentStatus !== "ACTIVE" && (
-        <button
-          disabled={loading}
-          onClick={() => updateStatus("ACTIVE")}
-          style={buttonStyle}
-        >
-          Active
-        </button>
-      )}
-      {currentStatus !== "COMPLETED" && (
-        <button
-          disabled={loading}
-          onClick={() => updateStatus("COMPLETED")}
-          style={buttonStyle}
-        >
-          Completed
-        </button>
-      )}
-      {currentStatus !== "ARCHIVED" && (
-        <button
-          disabled={loading}
-          onClick={() => updateStatus("ARCHIVED")}
-          style={buttonStyle}
-        >
-          Archive
-        </button>
-      )}
+      ))}
     </div>
   );
 }

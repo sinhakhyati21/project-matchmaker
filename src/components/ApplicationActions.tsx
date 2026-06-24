@@ -44,23 +44,44 @@ export default function ApplicationActions({
     setLoading(false);
   }
 
+  // Already processed — show nothing, badge in dashboard handles the status display
   if (status !== "PENDING") {
-    return <span className="font-semibold">{status}</span>;
+    return null;
   }
 
   return (
-    <div className="flex gap-2">
+    <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
       <button
         disabled={loading}
         onClick={() => updateStatus("ACCEPTED")}
-        className="bg-green-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
+        style={{
+          background: "rgba(34,197,94,0.1)",
+          color: "#4ade80",
+          border: "1px solid rgba(34,197,94,0.2)",
+          padding: "6px 14px",
+          borderRadius: 6,
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: loading ? "not-allowed" : "pointer",
+          opacity: loading ? 0.5 : 1,
+        }}
       >
         Accept
       </button>
       <button
         disabled={loading}
         onClick={() => updateStatus("REJECTED")}
-        className="bg-red-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
+        style={{
+          background: "rgba(239,68,68,0.1)",
+          color: "#f87171",
+          border: "1px solid rgba(239,68,68,0.2)",
+          padding: "6px 14px",
+          borderRadius: 6,
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: loading ? "not-allowed" : "pointer",
+          opacity: loading ? 0.5 : 1,
+        }}
       >
         Reject
       </button>

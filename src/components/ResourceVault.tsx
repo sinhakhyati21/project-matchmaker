@@ -11,6 +11,14 @@ type Resource = {
   type: string;
 };
 
+const TYPE_ICONS: Record<string, string> = {
+  GITHUB: "⌥",
+  DESIGN: "✦",
+  DOCS: "☰",
+  PRESENTATION: "◈",
+  OTHER: "○",
+};
+
 export default function ResourceVault({
   hubId,
   projectId,
@@ -53,29 +61,66 @@ export default function ResourceVault({
     setLoading(false);
   }
 
+  const inputStyle = {
+    width: "100%",
+    background: "var(--background)",
+    border: "1px solid var(--border)",
+    color: "var(--text-primary)",
+    borderRadius: 8,
+    padding: "10px 14px",
+    fontSize: 14,
+    outline: "none",
+  };
+
   return (
-    <div className="space-y-4">
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+
+      {/* Add Resource Form */}
       <form
         onSubmit={createResource}
-        className="border rounded-xl p-4 space-y-3"
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: 12,
+          padding: "20px 24px",
+          display: "flex",
+          flexDirection: "column" as const,
+          gap: 12,
+        }}
       >
-        <h3 className="font-bold">Add Resource</h3>
+        <h3
+          style={{
+            fontSize: 15,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            marginBottom: 4,
+          }}
+        >
+          Add Resource
+        </h3>
+
         <input
-          className="border rounded-lg px-3 py-2 w-full"
-          placeholder="Resource title"
+          style={inputStyle}
+          placeholder="Resource title (e.g. GitHub Repo, Figma Design)"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
+
         <input
-          className="border rounded-lg px-3 py-2 w-full"
+          style={inputStyle}
           placeholder="https://example.com"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
+
         <select
-          className="border rounded-lg px-3 py-2 w-full"
           value={type}
           onChange={(e) => setType(e.target.value)}
+          style={{
+            ...inputStyle,
+            cursor: "pointer",
+            appearance: "auto" as const,
+          }}
         >
           <option value="GITHUB">GitHub</option>
           <option value="DESIGN">Design</option>
@@ -83,28 +128,114 @@ export default function ResourceVault({
           <option value="PRESENTATION">Presentation</option>
           <option value="OTHER">Other</option>
         </select>
+
         <button
           disabled={loading}
-          className="bg-black text-white px-4 py-2 rounded-lg disabled:opacity-50"
+          style={{
+            background: loading ? "var(--border)" : "#6366f1",
+            color: "white",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: 8,
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: loading ? "not-allowed" : "pointer",
+            alignSelf: "flex-start" as const,
+          }}
         >
           {loading ? "Adding..." : "Add Resource"}
         </button>
       </form>
 
+      {/* Resource List */}
       {resources.length === 0 ? (
-        <p className="text-gray-500">No resources added yet.</p>
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px dashed var(--border)",
+            borderRadius: 12,
+            padding: 32,
+            textAlign: "center",
+          }}
+        >
+          <p style={{ color: "var(--text-muted)", fontSize: 14 }}>
+            No resources added yet. Add your GitHub repo, design files, or docs.
+          </p>
+        </div>
       ) : (
-        <div className="grid md:grid-cols-2 gap-4">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+            gap: 12,
+          }}
+        >
           {resources.map((resource) => {
             return (
               <div
                 key={resource._id}
                 onClick={() => window.open(resource.url, "_blank")}
-                className="border rounded-xl p-4 hover:bg-gray-50 cursor-pointer"
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 12,
+                  padding: "16px 18px",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  display: "flex",
+                  flexDirection: "column" as const,
+                  gap: 6,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#6366f1";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "var(--border)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
               >
-                <p className="text-sm text-gray-500">{resource.type}</p>
-                <h3 className="font-bold">{resource.title}</h3>
-                <p className="text-sm text-blue-600 break-all mt-1">
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 2,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: "#818cf8",
+                      background: "rgba(99,102,241,0.1)",
+                      border: "1px solid rgba(99,102,241,0.2)",
+                      padding: "2px 8px",
+                      borderRadius: 4,
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    {resource.type}
+                  </span>
+                </div>
+                <h3
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  {resource.title}
+                </h3>
+                <p
+                  style={{
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {resource.url}
                 </p>
               </div>
