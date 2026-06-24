@@ -9,16 +9,16 @@ import TeamRecommendations from "../../components/TeamRecommendations";
 import DashboardActions from "../../components/DashboardActions";
 
 const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
-  RECRUITING: { bg: "rgba(34,197,94,0.15)", color: "#4ade80" },
-  ACTIVE: { bg: "rgba(99,102,241,0.15)", color: "#818cf8" },
-  COMPLETED: { bg: "rgba(245,158,11,0.15)", color: "#fbbf24" },
-  ARCHIVED: { bg: "rgba(161,161,170,0.15)", color: "#a1a1aa" },
+  RECRUITING: { bg: "rgba(34,197,94,0.1)", color: "#4ade80" },
+  ACTIVE: { bg: "rgba(99,102,241,0.1)", color: "#818cf8" },
+  COMPLETED: { bg: "rgba(245,158,11,0.1)", color: "#fbbf24" },
+  ARCHIVED: { bg: "rgba(161,161,170,0.1)", color: "#a1a1aa" },
 };
 
 const APP_STATUS_COLORS: Record<string, { bg: string; color: string }> = {
-  PENDING: { bg: "rgba(245,158,11,0.15)", color: "#fbbf24" },
-  ACCEPTED: { bg: "rgba(34,197,94,0.15)", color: "#4ade80" },
-  REJECTED: { bg: "rgba(239,68,68,0.15)", color: "#f87171" },
+  PENDING: { bg: "rgba(245,158,11,0.1)", color: "#fbbf24" },
+  ACCEPTED: { bg: "rgba(34,197,94,0.1)", color: "#4ade80" },
+  REJECTED: { bg: "rgba(239,68,68,0.1)", color: "#f87171" },
 };
 
 export default async function DashboardPage() {
@@ -53,78 +53,77 @@ export default async function DashboardPage() {
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: "40px 24px" }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 40 }}>
+      <div style={{ marginBottom: 32 }}>
         <h1
           style={{
-            fontSize: 32,
-            fontWeight: 800,
+            fontSize: 28,
+            fontWeight: 700,
             color: "var(--text-primary)",
-            marginBottom: 8,
+            marginBottom: 6,
           }}
         >
           Dashboard
         </h1>
-        <p style={{ color: "var(--text-muted)", fontSize: 15 }}>
+        <p style={{ color: "var(--text-muted)", fontSize: 14 }}>
           Manage your projects and team applications.
         </p>
       </div>
 
-      {/* Stats Row */}
+      {/* Stats Row — subtle, professional */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: 16,
-          marginBottom: 48,
+          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+          gap: 12,
+          marginBottom: 40,
         }}
       >
         {[
           {
             label: "My Projects",
             value: safeProjects.length,
-            color: "#6366f1",
-            bg: "rgba(99,102,241,0.1)",
           },
           {
             label: "Applications",
             value: safeApplications.length,
-            color: "#22d3ee",
-            bg: "rgba(34,211,238,0.1)",
           },
           {
             label: "Pending Review",
             value: pendingCount,
-            color: "#fbbf24",
-            bg: "rgba(245,158,11,0.1)",
           },
           {
             label: "Accepted",
-            value: safeApplications.filter((a: any) => a.status === "ACCEPTED")
-              .length,
-            color: "#4ade80",
-            bg: "rgba(34,197,94,0.1)",
+            value: safeApplications.filter(
+              (a: any) => a.status === "ACCEPTED"
+            ).length,
           },
         ].map((stat) => (
           <div
             key={stat.label}
             style={{
-              background: stat.bg,
-              border: `1px solid ${stat.color}33`,
-              borderRadius: 12,
-              padding: "20px 24px",
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: 10,
+              padding: "16px 20px",
             }}
           >
             <p
               style={{
-                fontSize: 32,
-                fontWeight: 800,
-                color: stat.color,
+                fontSize: 26,
+                fontWeight: 700,
+                color: "var(--text-primary)",
                 lineHeight: 1,
               }}
             >
               {stat.value}
             </p>
-            <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 6 }}>
+            <p
+              style={{
+                fontSize: 12,
+                color: "var(--text-muted)",
+                marginTop: 6,
+              }}
+            >
               {stat.label}
             </p>
           </div>
@@ -138,25 +137,25 @@ export default async function DashboardPage() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: 24,
+            marginBottom: 20,
           }}
         >
           <h2
             style={{
-              fontSize: 22,
-              fontWeight: 700,
+              fontSize: 18,
+              fontWeight: 600,
               color: "var(--text-primary)",
             }}
           >
             My Projects
           </h2>
-          
-           <a href="/create-project"
+          <a
+            href="/create-project"
             style={{
               background: "#6366f1",
               color: "white",
-              padding: "8px 16px",
-              borderRadius: 8,
+              padding: "7px 14px",
+              borderRadius: 7,
               fontSize: 13,
               fontWeight: 600,
               textDecoration: "none",
@@ -166,26 +165,40 @@ export default async function DashboardPage() {
           </a>
         </div>
 
-        {safeApplications.length === 0 ? (
+        {safeProjects.length === 0 ? (
           <div
             style={{
               background: "var(--surface)",
               border: "1px dashed var(--border)",
-              borderRadius: 16,
+              borderRadius: 12,
               padding: 48,
               textAlign: "center",
             }}
           >
-            <p style={{ color: "var(--text-muted)", fontSize: 15 }}>
-              No applications yet. Share your project to attract candidates.
+            <p style={{ color: "var(--text-muted)", fontSize: 14, marginBottom: 16 }}>
+              No projects yet. Create your first one.
             </p>
+            <a
+              href="/create-project"
+              style={{
+                background: "#6366f1",
+                color: "white",
+                padding: "8px 20px",
+                borderRadius: 7,
+                fontWeight: 600,
+                textDecoration: "none",
+                fontSize: 13,
+              }}
+            >
+              Create Project
+            </a>
           </div>
         ) : (
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-              gap: 20,
+              gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+              gap: 16,
             }}
           >
             {safeProjects.map((project: any) => {
@@ -203,13 +216,14 @@ export default async function DashboardPage() {
                   style={{
                     background: "var(--surface)",
                     border: "1px solid var(--border)",
-                    borderRadius: 16,
-                    padding: 24,
+                    borderRadius: 12,
+                    padding: 20,
                     display: "flex",
                     flexDirection: "column",
-                    gap: 16,
+                    gap: 14,
                   }}
                 >
+                  {/* Project Header */}
                   <div
                     style={{
                       display: "flex",
@@ -219,10 +233,11 @@ export default async function DashboardPage() {
                   >
                     <h3
                       style={{
-                        fontSize: 17,
-                        fontWeight: 700,
+                        fontSize: 15,
+                        fontWeight: 600,
                         color: "var(--text-primary)",
                         flex: 1,
+                        lineHeight: 1.4,
                       }}
                     >
                       {project.title}
@@ -231,12 +246,14 @@ export default async function DashboardPage() {
                       style={{
                         background: statusStyle.bg,
                         color: statusStyle.color,
-                        padding: "3px 10px",
-                        borderRadius: 9999,
-                        fontSize: 11,
+                        padding: "2px 8px",
+                        borderRadius: 4,
+                        fontSize: 10,
                         fontWeight: 600,
                         marginLeft: 8,
                         whiteSpace: "nowrap",
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase" as const,
                       }}
                     >
                       {status}
@@ -248,29 +265,38 @@ export default async function DashboardPage() {
                       fontSize: 13,
                       color: "var(--text-muted)",
                       lineHeight: 1.5,
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical" as const,
+                      overflow: "hidden",
                     }}
                   >
                     {project.description}
                   </p>
 
+                  {/* Team Progress */}
                   <div>
                     <div
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
-                        marginBottom: 6,
+                        marginBottom: 5,
                       }}
                     >
-                      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                      <span
+                        style={{ fontSize: 11, color: "var(--text-muted)" }}
+                      >
                         Team
                       </span>
-                      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                      <span
+                        style={{ fontSize: 11, color: "var(--text-muted)" }}
+                      >
                         {memberCount}/{project.maxTeamSize}
                       </span>
                     </div>
                     <div
                       style={{
-                        height: 4,
+                        height: 3,
                         background: "var(--border)",
                         borderRadius: 9999,
                         overflow: "hidden",
@@ -286,6 +312,14 @@ export default async function DashboardPage() {
                       />
                     </div>
                   </div>
+
+                  {/* Divider */}
+                  <div
+                    style={{
+                      height: 1,
+                      background: "var(--border)",
+                    }}
+                  />
 
                   <ProjectStatusActions
                     projectId={project._id}
@@ -309,10 +343,10 @@ export default async function DashboardPage() {
       <section>
         <h2
           style={{
-            fontSize: 22,
-            fontWeight: 700,
+            fontSize: 18,
+            fontWeight: 600,
             color: "var(--text-primary)",
-            marginBottom: 24,
+            marginBottom: 20,
           }}
         >
           Applications Received
@@ -323,18 +357,17 @@ export default async function DashboardPage() {
             style={{
               background: "var(--surface)",
               border: "1px dashed var(--border)",
-              borderRadius: 16,
+              borderRadius: 12,
               padding: 48,
               textAlign: "center",
             }}
           >
-            <p style={{ fontSize: 40, marginBottom: 12 }}>📭</p>
-            <p style={{ color: "var(--text-muted)", fontSize: 15 }}>
-              No applications yet. Share your project to attract candidates.
+            <p style={{ color: "var(--text-muted)", fontSize: 14 }}>
+              No applications received yet.
             </p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {safeApplications.map((application: any) => {
               const appStatus = application.status || "PENDING";
               const appStatusStyle =
@@ -346,8 +379,8 @@ export default async function DashboardPage() {
                   style={{
                     background: "var(--surface)",
                     border: "1px solid var(--border)",
-                    borderRadius: 12,
-                    padding: 20,
+                    borderRadius: 10,
+                    padding: "16px 20px",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
@@ -355,33 +388,39 @@ export default async function DashboardPage() {
                   }}
                 >
                   <div
-                    style={{ display: "flex", alignItems: "center", gap: 12 }}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                    }}
                   >
                     {application.user?.image && (
                       <img
                         src={application.user.image}
                         alt={application.user.name}
                         style={{
-                          width: 44,
-                          height: 44,
+                          width: 40,
+                          height: 40,
                           borderRadius: "50%",
-                          border: "2px solid var(--border)",
+                          border: "1px solid var(--border)",
                         }}
                       />
                     )}
                     <div>
                       <h3
                         style={{
-                          fontWeight: 700,
-                          fontSize: 15,
+                          fontWeight: 600,
+                          fontSize: 14,
                           color: "var(--text-primary)",
                           marginBottom: 2,
                         }}
                       >
                         {application.user?.name || "Unknown User"}
                       </h3>
-                      <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                        @{application.user?.githubUsername || "github"} · For:{" "}
+                      <p
+                        style={{ fontSize: 12, color: "var(--text-muted)" }}
+                      >
+                        @{application.user?.githubUsername || "github"} ·{" "}
                         {application.project?.title}
                       </p>
                       <div
@@ -389,7 +428,7 @@ export default async function DashboardPage() {
                           display: "flex",
                           flexWrap: "wrap",
                           gap: 4,
-                          marginTop: 6,
+                          marginTop: 5,
                         }}
                       >
                         {application.user?.skills
@@ -398,11 +437,11 @@ export default async function DashboardPage() {
                             <span
                               key={skill}
                               style={{
-                                background: "rgba(99,102,241,0.1)",
+                                background: "rgba(99,102,241,0.08)",
                                 color: "#818cf8",
-                                border: "1px solid rgba(99,102,241,0.2)",
-                                padding: "2px 8px",
-                                borderRadius: 9999,
+                                border: "1px solid rgba(99,102,241,0.15)",
+                                padding: "1px 7px",
+                                borderRadius: 4,
                                 fontSize: 11,
                               }}
                             >
@@ -417,17 +456,20 @@ export default async function DashboardPage() {
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 12,
+                      gap: 10,
+                      flexShrink: 0,
                     }}
                   >
                     <span
                       style={{
                         background: appStatusStyle.bg,
                         color: appStatusStyle.color,
-                        padding: "4px 12px",
-                        borderRadius: 9999,
-                        fontSize: 12,
+                        padding: "3px 10px",
+                        borderRadius: 4,
+                        fontSize: 11,
                         fontWeight: 600,
+                        textTransform: "uppercase" as const,
+                        letterSpacing: "0.05em",
                       }}
                     >
                       {appStatus}

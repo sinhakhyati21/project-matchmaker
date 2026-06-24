@@ -18,7 +18,7 @@ export default function ProjectStatusActions({
 
   async function updateStatus(status: ProjectStatus) {
     const confirmed = window.confirm(
-      `Are you sure you want to mark this project as ${status}?`
+      `Mark this project as ${status}?`
     );
     if (!confirmed) return;
 
@@ -39,13 +39,30 @@ export default function ProjectStatusActions({
     setLoading(false);
   }
 
+  const buttonStyle = {
+    background: "transparent",
+    color: "var(--text-muted)",
+    border: "1px solid var(--border)",
+    padding: "5px 10px",
+    borderRadius: 6,
+    fontSize: 11,
+    fontWeight: 500,
+    cursor: "pointer",
+    transition: "all 0.2s",
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.04em",
+  };
+
   return (
-    <div className="flex flex-wrap gap-2 mt-4">
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+      <span style={{ fontSize: 11, color: "var(--text-muted)", alignSelf: "center" }}>
+        Move to:
+      </span>
       {currentStatus !== "RECRUITING" && (
         <button
           disabled={loading}
           onClick={() => updateStatus("RECRUITING")}
-          className="border px-3 py-2 rounded-lg"
+          style={buttonStyle}
         >
           Recruiting
         </button>
@@ -54,7 +71,7 @@ export default function ProjectStatusActions({
         <button
           disabled={loading}
           onClick={() => updateStatus("ACTIVE")}
-          className="bg-blue-600 text-white px-3 py-2 rounded-lg"
+          style={buttonStyle}
         >
           Active
         </button>
@@ -63,7 +80,7 @@ export default function ProjectStatusActions({
         <button
           disabled={loading}
           onClick={() => updateStatus("COMPLETED")}
-          className="bg-green-600 text-white px-3 py-2 rounded-lg"
+          style={buttonStyle}
         >
           Completed
         </button>
@@ -72,7 +89,7 @@ export default function ProjectStatusActions({
         <button
           disabled={loading}
           onClick={() => updateStatus("ARCHIVED")}
-          className="bg-gray-700 text-white px-3 py-2 rounded-lg"
+          style={buttonStyle}
         >
           Archive
         </button>
