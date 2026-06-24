@@ -8,6 +8,7 @@ import ResourceVault from "./ResourceVault";
 import ExpenseTracker from "./ExpenseTracker";
 import ReviewForm from "./ReviewForm";
 import CreateTaskForm from "./CreateTaskForm";
+import ProjectAnalytics from "./ProjectAnalytics";
 
 type Member = {
   _id: string;
@@ -103,76 +104,85 @@ export default function HubTabs({
       `}</style>
 
       {/* Team Members */}
-      <Tabs.Content value="members">
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-            gap: 16,
-          }}
-        >
-          {hub.members.map((member: Member, i: number) => {
-            const statusStyle =
-              STATUS_COLORS[member.status || ""] || null;
-            return (
-              <div
-                key={`${member._id}-${i}`}
+<Tabs.Content value="members">
+  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+        gap: 16,
+      }}
+    >
+      {hub.members.map((member: Member, i: number) => {
+        const statusStyle = STATUS_COLORS[member.status || ""] || null;
+        return (
+          <div
+            key={`${member._id}-${i}`}
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: 12,
+              padding: 16,
+              display: "flex",
+              gap: 14,
+              alignItems: "center",
+            }}
+          >
+            {member.image && (
+              <img
+                src={member.image}
+                alt={member.name}
                 style={{
-                  background: "var(--surface)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 12,
-                  padding: 16,
-                  display: "flex",
-                  gap: 14,
-                  alignItems: "center",
+                  width: 48,
+                  height: 48,
+                  borderRadius: "50%",
+                  border: "2px solid var(--border)",
+                }}
+              />
+            )}
+            <div>
+              <h3
+                style={{
+                  fontWeight: 700,
+                  fontSize: 15,
+                  color: "var(--text-primary)",
+                  marginBottom: 2,
                 }}
               >
-                {member.image && (
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: "50%",
-                      border: "2px solid var(--border)",
-                    }}
-                  />
-                )}
-                <div>
-                  <h3
-                    style={{
-                      fontWeight: 700,
-                      fontSize: 15,
-                      color: "var(--text-primary)",
-                      marginBottom: 2,
-                    }}
-                  >
-                    {member.name}
-                  </h3>
-                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 6 }}>
-                    @{member.githubUsername || "github"}
-                  </p>
-                  {member.status && (
-                    <span
-                      style={{
-                        background: statusStyle?.bg || "rgba(161,161,170,0.15)",
-                        color: statusStyle?.color || "#a1a1aa",
-                        padding: "2px 8px",
-                        borderRadius: 9999,
-                        fontSize: 11,
-                        fontWeight: 500,
-                      }}
-                    >
-                      {member.status.replaceAll("_", " ")}
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </Tabs.Content>
+                {member.name}
+              </h3>
+              <p
+                style={{
+                  fontSize: 12,
+                  color: "var(--text-muted)",
+                  marginBottom: 6,
+                }}
+              >
+                @{member.githubUsername || "github"}
+              </p>
+              {member.status && (
+                <span
+                  style={{
+                    background:
+                      statusStyle?.bg || "rgba(161,161,170,0.15)",
+                    color: statusStyle?.color || "#a1a1aa",
+                    padding: "2px 8px",
+                    borderRadius: 9999,
+                    fontSize: 11,
+                    fontWeight: 500,
+                  }}
+                >
+                  {member.status.replaceAll("_", " ")}
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+    <ProjectAnalytics projectId={hub.project._id} />
+  </div>
+</Tabs.Content>
 
       {/* Chat */}
       <Tabs.Content value="chat">

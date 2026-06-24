@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type Expense = {
   _id: string;
@@ -25,7 +26,6 @@ export default function ExpenseTracker({
   expenses: Expense[];
 }) {
   const router = useRouter();
-
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
@@ -36,135 +36,304 @@ export default function ExpenseTracker({
     0
   );
 
+  const largestExpense = expenses.reduce(
+    (max, expense) => (expense.amount > max ? expense.amount : max),
+    0
+  );
+
   async function addExpense(e: React.FormEvent) {
     e.preventDefault();
 
     if (!title.trim() || Number(amount) <= 0) {
-      alert("Enter valid title and amount");
+      toast.error("Enter valid title and amount");
       return;
     }
 
     setLoading(true);
-
     const res = await fetch("/api/expenses", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        hubId,
-        projectId,
-        title,
-        amount,
-        note,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hubId, projectId, title, amount, note }),
     });
 
     const data = await res.json();
-
     if (res.ok) {
+      toast.success("Expense added!");
       setTitle("");
       setAmount("");
       setNote("");
       router.refresh();
     } else {
-      alert(data.message || "Failed to add expense");
+      toast.error(data.message || "Failed to add expense");
     }
-
     setLoading(false);
   }
 
   return (
-    <div className="border rounded-xl p-5 space-y-5">
-      <div>
-        <h2 className="text-2xl font-bold">Expense Tracker</h2>
-        <p className="text-gray-500 text-sm mt-1">
-          Track shared project spending.
-        </p>
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+      {/* Stats Row */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            background: "rgba(99,102,241,0.1)",
+            border: "1px solid rgba(99,102,241,0.2)",
+            borderRadius: 12,
+            padding: 16,
+          }}
+        >
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
+            Total Spent
+          </p>
+          <p style={{ fontSize: 24, fontWeight: 800, color: "#818cf8" }}>
+            ₹{totalExpense.toFixed(2)}
+          </p>
+        </div>
+        <div
+          style={{
+            background: "rgba(34,197,94,0.1)",
+            border: "1px solid rgba(34,197,94,0.2)",
+            borderRadius: 12,
+            padding: 16,
+          }}
+        >
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
+            Total Entries
+          </p>
+          <p style={{ fontSize: 24, fontWeight: 800, color: "#4ade80" }}>
+            {expenses.length}
+          </p>
+        </div>
+        <div
+          style={{
+            background: "rgba(245,158,11,0.1)",
+            border: "1px solid rgba(245,158,11,0.2)",
+            borderRadius: 12,
+            padding: 16,
+          }}
+        >
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
+            Largest Expense
+          </p>
+          <p style={{ fontSize: 24, fontWeight: 800, color: "#fbbf24" }}>
+            ₹{largestExpense.toFixed(2)}
+          </p>
+        </div>
       </div>
 
-      <div className="border rounded-xl p-4 bg-gray-50">
-        <p className="text-sm text-gray-500">Total Expense</p>
-        <p className="text-3xl font-bold">
-          ₹{totalExpense.toFixed(2)}
-        </p>
-      </div>
-
+      {/* Add Expense Form */}
       <form
         onSubmit={addExpense}
-        className="border rounded-xl p-4 space-y-3"
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: 12,
+          padding: 20,
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
       >
-        <h3 className="font-bold">Add Expense</h3>
-
+        <h3 style={{ fontWeight: 700, color: "var(--text-primary)", fontSize: 15 }}>
+          Add Expense
+        </h3>
         <input
-          className="border rounded-lg px-3 py-2 w-full"
-          placeholder="Expense title"
+          style={{
+            background: "var(--background)",
+            border: "1px solid var(--border)",
+            color: "var(--text-primary)",
+            borderRadius: 8,
+            padding: "9px 14px",
+            fontSize: 14,
+            outline: "none",
+            width: "100%",
+          }}
+          placeholder="Expense title (e.g. AWS bill)"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-
         <input
           type="number"
           min="1"
-          className="border rounded-lg px-3 py-2 w-full"
-          placeholder="Amount"
+          style={{
+            background: "var(--background)",
+            border: "1px solid var(--border)",
+            color: "var(--text-primary)",
+            borderRadius: 8,
+            padding: "9px 14px",
+            fontSize: 14,
+            outline: "none",
+            width: "100%",
+          }}
+          placeholder="Amount (₹)"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
-
         <textarea
-          className="border rounded-lg px-3 py-2 w-full"
+          style={{
+            background: "var(--background)",
+            border: "1px solid var(--border)",
+            color: "var(--text-primary)",
+            borderRadius: 8,
+            padding: "9px 14px",
+            fontSize: 14,
+            outline: "none",
+            width: "100%",
+            resize: "vertical",
+          }}
           placeholder="Optional note"
           value={note}
           onChange={(e) => setNote(e.target.value)}
         />
-
         <button
           disabled={loading}
-          className="bg-black text-white px-4 py-2 rounded-lg disabled:opacity-50"
+          style={{
+            background: loading ? "var(--border)" : "#6366f1",
+            color: "white",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: 8,
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: loading ? "not-allowed" : "pointer",
+            alignSelf: "flex-start",
+          }}
         >
           {loading ? "Adding..." : "Add Expense"}
         </button>
       </form>
 
-      <div className="space-y-3">
-        <h3 className="font-bold">Expense History</h3>
-
+      {/* Expense History */}
+      <div>
+        <h3
+          style={{
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            fontSize: 15,
+            marginBottom: 12,
+          }}
+        >
+          Expense History
+        </h3>
         {expenses.length === 0 ? (
-          <p className="text-gray-500">No expenses added yet.</p>
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px dashed var(--border)",
+              borderRadius: 12,
+              padding: 32,
+              textAlign: "center",
+            }}
+          >
+            <p style={{ color: "var(--text-muted)", fontSize: 14 }}>
+              No expenses added yet.
+            </p>
+          </div>
         ) : (
-          expenses.map((expense) => (
-            <div
-              key={expense._id}
-              className="border rounded-xl p-4 flex justify-between gap-4"
-            >
-              <div>
-                <h4 className="font-bold">{expense.title}</h4>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {expenses.map((expense) => {
+              const pct =
+                totalExpense > 0
+                  ? Math.round((expense.amount / totalExpense) * 100)
+                  : 0;
 
-                <p className="text-sm text-gray-500">
-                  Paid by{" "}
-                  {expense.paidBy?.name ||
-                    expense.paidBy?.githubUsername ||
-                    "Unknown"}
-                </p>
+              return (
+                <div
+                  key={expense._id}
+                  style={{
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 12,
+                    padding: 16,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: 8,
+                    }}
+                  >
+                    <div>
+                      <h4
+                        style={{
+                          fontWeight: 700,
+                          color: "var(--text-primary)",
+                          fontSize: 14,
+                          marginBottom: 2,
+                        }}
+                      >
+                        {expense.title}
+                      </h4>
+                      <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                        Paid by{" "}
+                        {expense.paidBy?.name ||
+                          expense.paidBy?.githubUsername ||
+                          "Unknown"}{" "}
+                        ·{" "}
+                        {new Date(expense.createdAt).toLocaleString("en-IN", {
+                          dateStyle: "short",
+                          timeStyle: "short",
+                        })}
+                      </p>
+                      {expense.note && (
+                        <p
+                          style={{
+                            fontSize: 12,
+                            color: "var(--text-muted)",
+                            marginTop: 4,
+                            fontStyle: "italic",
+                          }}
+                        >
+                          {expense.note}
+                        </p>
+                      )}
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      <p
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 16,
+                          color: "#818cf8",
+                        }}
+                      >
+                        ₹{expense.amount}
+                      </p>
+                      <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                        {pct}% of total
+                      </p>
+                    </div>
+                  </div>
 
-                {expense.note && (
-                  <p className="text-sm mt-2">{expense.note}</p>
-                )}
-              </div>
-
-              <div className="text-right">
-                <p className="font-bold">₹{expense.amount}</p>
-
-                <p className="text-xs text-gray-500">
-                  {new Date(expense.createdAt).toLocaleString("en-IN", {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                  })}
-                </p>
-              </div>
-            </div>
-          ))
+                  {/* Progress bar showing % of total */}
+                  <div
+                    style={{
+                      height: 3,
+                      background: "var(--border)",
+                      borderRadius: 9999,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        height: "100%",
+                        width: `${pct}%`,
+                        background: "#6366f1",
+                        borderRadius: 9999,
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
