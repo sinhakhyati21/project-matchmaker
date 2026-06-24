@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
+import GitHubSetupButton from "./GitHubSetupButton";
 
 export default function DashboardActions({
   projectId,
@@ -39,7 +40,7 @@ export default function DashboardActions({
     projectStatus !== "ACTIVE" && projectStatus !== "COMPLETED";
 
   return (
-    <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 4 }}>
       <button
         onClick={() => router.push(`/hub/${projectId}`)}
         style={{
@@ -93,6 +94,12 @@ export default function DashboardActions({
           {loading ? "Deleting..." : "Delete"}
         </button>
       )}
+
+      {/* Auto GitHub Setup — only shows when project is ACTIVE */}
+      <GitHubSetupButton
+        projectId={projectId}
+        projectStatus={projectStatus}
+      />
     </div>
   );
 }

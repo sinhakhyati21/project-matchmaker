@@ -7,6 +7,7 @@ export interface IUser extends Document {
   githubUsername?: string;
   githubBio?: string;
   githubUrl?: string;
+  githubAccessToken?: string;
   skills: string[];
   status:
     | "AVAILABLE"
@@ -20,24 +21,20 @@ export interface IUser extends Document {
 const UserSchema = new mongoose.Schema<IUser>(
   {
     name: { type: String, required: true },
-
     email: {
       type: String,
       required: true,
       unique: true,
     },
-
     image: String,
-
     githubUsername: String,
     githubBio: String,
     githubUrl: String,
-
+    githubAccessToken: String,
     skills: {
       type: [String],
       default: [],
     },
-
     status: {
       type: String,
       enum: [
