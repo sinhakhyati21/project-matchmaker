@@ -1,153 +1,210 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "../../components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
+const CATEGORIES = [
+  "Web Development",
+  "Mobile App",
+  "AI / ML",
+  "Blockchain",
+  "Game Dev",
+  "Data Science",
+  "DevTools",
+  "Open Source",
+  "Research",
+  "Other",
+];
 
 export default function ProjectForm() {
+  const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [skills, setSkills] = useState("");
   const [roles, setRoles] = useState("");
   const [teamSize, setTeamSize] = useState(2);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
-    setLoading(true);
 
+    if (!title.trim()) { toast.error("Title is required"); return; }
+    if (!description.trim()) { toast.error("Description is required"); return; }
+    if (!category) { toast.error("Category is required"); return; }
+    if (!skills.trim()) { toast.error("Required skills are required"); return; }
+
+    setLoading(true);
     try {
       const response = await fetch("/api/projects", {
         method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           description,
           category,
-          requiredSkills: skills
-            .split(",")
-            .map((s) => s.trim()),
-
-          requiredRoles: roles
-            .split(",")
-            .map((r) => r.trim()),
-
+          requiredSkills: skills.split(",").map((s) => s.trim()).filter(Boolean),
+          requiredRoles: roles.split(",").map((r) => r.trim()).filter(Boolean),
           maxTeamSize: teamSize,
         }),
       });
 
       const data = await response.json();
-
       if (response.ok) {
-        alert("Project created!");
-
+        toast.success("Project created successfully!");
         setTitle("");
         setDescription("");
         setCategory("");
         setSkills("");
         setRoles("");
         setTeamSize(2);
+        router.push("/dashboard");
       } else {
-        setError(data.error || data.message || "Failed to create project");
+        toast.error(data.error || data.message || "Failed to create project");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      toast.error(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
   }
 
+  const labelStyle = {
+    fontSize: 13,
+    fontWeight: 600,
+    color: "var(--text-primary)",
+    marginBottom: 6,
+    display: "block" as const,
+  };
+
+  const inputStyle = {
+    width: "100%",
+    background: "var(--surface)",
+    border: "1px solid var(--border)",
+    color: "var(--text-primary)",
+    borderRadius: 8,
+    padding: "10px 14px",
+    fontSize: 14,
+    outline: "none",
+    transition: "border-color 0.2s",
+  };
+
+  const hintStyle = {
+    fontSize: 12,
+    color: "var(--text-muted)",
+    marginTop: 4,
+  };
+
   return (
-  <form
-    onSubmit={handleSubmit}
-    className="space-y-6 max-w-xl"
-  >
-    <div className="space-y-2">
-      <label className="text-sm font-medium">
-        Title
-      </label>
+    <form
+      onSubmit={handleSubmit}
+      style={{
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        borderRadius: 16,
+        padding: 32,
+        display: "flex",
+        flexDirection: "column" as const,
+        gap: 24,
+      }}
+    >
+      {/* Title */}
+      <div>
+        <label style={labelStyle}>Project Title *</label>
+        <input
+          style={inputStyle}
+          placeholder="e.g. AI-powered Resume Builder"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
 
-      <Input
-        placeholder="Enter project title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-    </div>
+      {/* Description */}
+      <div>
+        <label style={labelStyle}>Description *</label>
+        <textarea
+          style={{ ...inputStyle, minHeight: 100, resize: "vertical" as const }}
+          placeholder="Describe your project idea, goals, and what you are building..."
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
 
-    <div className="space-y-2">
-      <label className="text-sm font-medium">
-        Description
-      </label>
+      {/* Category */}
+      <div>
+        <label style={labelStyle}>Category *</label>
+        <select
+          style={inputStyle}
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="">Select a category</option>
+          {CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <Textarea
-        placeholder="Describe your project"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-    </div>
+      {/* Required Skills */}
+      <div>
+        <label style={labelStyle}>Required Skills *</label>
+        <input
+          style={inputStyle}
+          placeholder="React, Node.js, MongoDB, Python..."
+          value={skills}
+          onChange={(e) => setSkills(e.target.value)}
+        />
+        <p style={hintStyle}>Separate skills with commas</p>
+      </div>
 
-    <div className="space-y-2">
-      <label className="text-sm font-medium">
-        Category
-      </label>
+      {/* Required Roles */}
+      <div>
+        <label style={labelStyle}>Required Roles</label>
+        <input
+          style={inputStyle}
+          placeholder="Frontend Developer, Backend Developer, Designer..."
+          value={roles}
+          onChange={(e) => setRoles(e.target.value)}
+        />
+        <p style={hintStyle}>Separate roles with commas</p>
+      </div>
 
-      <Input
-        placeholder="Web Dev, AI, Blockchain..."
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-      />
-    </div>
+      {/* Team Size */}
+      <div>
+        <label style={labelStyle}>Maximum Team Size *</label>
+        <input
+          type="number"
+          min={2}
+          max={20}
+          style={{ ...inputStyle, width: 120 }}
+          value={teamSize}
+          onChange={(e) => setTeamSize(Number(e.target.value))}
+        />
+        <p style={hintStyle}>Minimum 2, maximum 20</p>
+      </div>
 
-    <div className="space-y-2">
-      <label className="text-sm font-medium">
-        Required Skills
-      </label>
-
-      <Input
-        placeholder="React, Node.js, MongoDB"
-        value={skills}
-        onChange={(e) => setSkills(e.target.value)}
-      />
-    </div>
-
-    <div className="space-y-2">
-      <label className="text-sm font-medium">
-        Required Roles
-      </label>
-
-      <Input
-        placeholder="Frontend Developer, Backend Developer"
-        value={roles}
-        onChange={(e) => setRoles(e.target.value)}
-      />
-    </div>
-
-    <div className="space-y-2">
-      <label className="text-sm font-medium">
-        Maximum Team Size
-      </label>
-
-      <Input
-        type="number"
-        min={1}
-        value={teamSize}
-        onChange={(e) =>
-          setTeamSize(Number(e.target.value))
-        }
-      />
-    </div>
-
-    <Button type="submit">
-      Create Project
-    </Button>
-  </form>
-);
+      {/* Submit */}
+      <button
+        type="submit"
+        disabled={loading}
+        style={{
+          background: loading ? "var(--border)" : "#6366f1",
+          color: "white",
+          border: "none",
+          padding: "12px 24px",
+          borderRadius: 10,
+          fontSize: 15,
+          fontWeight: 700,
+          cursor: loading ? "not-allowed" : "pointer",
+          transition: "all 0.2s",
+          alignSelf: "flex-start" as const,
+        }}
+      >
+        {loading ? "Creating..." : "Create Project"}
+      </button>
+    </form>
+  );
 }

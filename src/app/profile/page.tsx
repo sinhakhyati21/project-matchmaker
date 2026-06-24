@@ -19,7 +19,6 @@ export default async function ProfilePage() {
   await connectDB();
 
   const user = await User.findById(session.user.id);
-
   if (!user) {
     redirect("/signin");
   }
@@ -28,65 +27,165 @@ export default async function ProfilePage() {
   const safeUser = JSON.parse(JSON.stringify(user));
 
   return (
-    <div className="p-10 space-y-8 max-w-4xl mx-auto">
+    <div style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px" }}>
 
-      {/* Header */}
-      <div className="flex gap-6 items-center">
+      {/* Header Card */}
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: 16,
+          padding: 28,
+          display: "flex",
+          gap: 24,
+          alignItems: "flex-start",
+          marginBottom: 24,
+        }}
+      >
         {safeUser.image && (
           <img
             src={safeUser.image}
             alt={safeUser.name}
-            className="w-24 h-24 rounded-full border"
+            style={{
+              width: 88,
+              height: 88,
+              borderRadius: "50%",
+              border: "3px solid var(--border)",
+              flexShrink: 0,
+            }}
           />
         )}
-        <div>
-          <h1 className="text-3xl font-bold">{safeUser.name}</h1>
-          <p className="text-gray-500">@{safeUser.githubUsername}</p>
-          <p className="mt-2">
+        <div style={{ flex: 1 }}>
+          <h1
+            style={{
+              fontSize: 26,
+              fontWeight: 800,
+              color: "var(--text-primary)",
+              marginBottom: 4,
+            }}
+          >
+            {safeUser.name}
+          </h1>
+          <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 8 }}>
+            @{safeUser.githubUsername}
+          </p>
+          <p
+            style={{
+              fontSize: 14,
+              color: "var(--text-muted)",
+              lineHeight: 1.6,
+              marginBottom: 12,
+            }}
+          >
             {safeUser.githubBio || "No GitHub bio available."}
           </p>
           {safeUser.githubUrl && (
             <ProfileGithubLink url={safeUser.githubUrl} />
           )}
         </div>
+
+        {/* Trust Score Badge */}
+        <div
+          style={{
+            background: "rgba(99,102,241,0.1)",
+            border: "1px solid rgba(99,102,241,0.3)",
+            borderRadius: 12,
+            padding: "16px 20px",
+            textAlign: "center",
+            flexShrink: 0,
+          }}
+        >
+          <p
+            style={{
+              fontSize: 32,
+              fontWeight: 800,
+              color: "#818cf8",
+              lineHeight: 1,
+            }}
+          >
+            {trustScore.count === 0 ? "—" : `${trustScore.average}`}
+          </p>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
+            Trust Score
+          </p>
+          <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
+            {trustScore.count === 0
+              ? "No reviews"
+              : `${trustScore.count} review${trustScore.count > 1 ? "s" : ""}`}
+          </p>
+        </div>
       </div>
 
       {/* Status */}
-      <StatusUpdate currentStatus={safeUser.status} />
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: 16,
+          padding: 24,
+          marginBottom: 24,
+        }}
+      >
+        <StatusUpdate currentStatus={safeUser.status} />
+      </div>
 
       {/* Skills */}
-      <SkillsEditor currentSkills={safeUser.skills || []} />
-
-      {/* Trust Score */}
-      <section className="border rounded-xl p-5">
-        <h2 className="text-2xl font-bold">Trust Score</h2>
-        {trustScore.count === 0 ? (
-          <p className="text-gray-500 mt-2">No reviews yet.</p>
-        ) : (
-          <>
-            <p className="text-4xl font-bold mt-2">
-              {trustScore.average}/5
-            </p>
-            <p className="text-gray-500 mt-1">
-              Based on {trustScore.count} review(s)
-            </p>
-          </>
-        )}
-      </section>
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: 16,
+          padding: 24,
+          marginBottom: 24,
+        }}
+      >
+        <SkillsEditor currentSkills={safeUser.skills || []} />
+      </div>
 
       {/* Contribution Graph */}
-      <section>
-        <h2 className="text-2xl font-bold mb-4">
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: 16,
+          padding: 24,
+          marginBottom: 24,
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 18,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            marginBottom: 16,
+          }}
+        >
           GitHub Contribution Graph
         </h2>
         <ContributionGraph username={safeUser.githubUsername} />
-      </section>
+      </div>
 
       {/* Repos */}
-      <section>
-        <h2 className="text-2xl font-bold mb-4">Public Repositories</h2>
+      <div
+        style={{
+          background: "var(--surface)",
+          border: "1px solid var(--border)",
+          borderRadius: 16,
+          padding: 24,
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 18,
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            marginBottom: 16,
+          }}
+        >
+          Public Repositories
+        </h2>
         <GitHubRepos username={safeUser.githubUsername} />
-      </section>
+      </div>
 
     </div>
   );

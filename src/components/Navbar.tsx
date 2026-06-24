@@ -1,5 +1,4 @@
 import Link from "next/link";
-
 import { auth } from "../auth";
 import SignOutButton from "./SignOutButton";
 
@@ -7,27 +6,166 @@ export default async function Navbar() {
   const session = await auth();
 
   return (
-    <nav className="border-b px-6 py-4 flex justify-between items-center">
-      <Link href="/" className="text-2xl font-bold">
-        Project Matchmaker
+    <nav
+      style={{
+        background: "rgba(15,15,16,0.8)",
+        backdropFilter: "blur(12px)",
+        borderBottom: "1px solid var(--border)",
+        padding: "0 24px",
+        height: 64,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+      }}
+    >
+      {/* Logo */}
+      <Link
+        href="/"
+        style={{
+          fontSize: 18,
+          fontWeight: 800,
+          color: "var(--text-primary)",
+          textDecoration: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        <span
+          style={{
+            background: "#6366f1",
+            color: "white",
+            width: 28,
+            height: 28,
+            borderRadius: 8,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 14,
+            fontWeight: 800,
+          }}
+        >
+          PM
+        </span>
+        <span>Project Matchmaker</span>
       </Link>
 
-      <div className="flex gap-4 items-center">
-        <Link href="/projects">Projects</Link>
+      {/* Nav Links */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        <Link
+          href="/projects"
+          style={{
+            color: "var(--text-muted)",
+            textDecoration: "none",
+            fontSize: 14,
+            fontWeight: 500,
+            padding: "6px 12px",
+            borderRadius: 8,
+            transition: "all 0.2s",
+          }}
+        >
+          Projects
+        </Link>
 
         {session && (
           <>
-            <Link href="/create-project">Create Project</Link>
-            <Link href="/dashboard">Dashboard</Link>
-            <Link href="/profile">Profile</Link>
-            <Link href="/invitations">Invitations</Link>
+            <Link
+              href="/create-project"
+              style={{
+                color: "var(--text-muted)",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: 500,
+                padding: "6px 12px",
+                borderRadius: 8,
+                transition: "all 0.2s",
+              }}
+            >
+              Create
+            </Link>
+            <Link
+              href="/dashboard"
+              style={{
+                color: "var(--text-muted)",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: 500,
+                padding: "6px 12px",
+                borderRadius: 8,
+              }}
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/profile"
+              style={{
+                color: "var(--text-muted)",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: 500,
+                padding: "6px 12px",
+                borderRadius: 8,
+              }}
+            >
+              Profile
+            </Link>
+            <Link
+              href="/invitations"
+              style={{
+                color: "var(--text-muted)",
+                textDecoration: "none",
+                fontSize: 14,
+                fontWeight: 500,
+                padding: "6px 12px",
+                borderRadius: 8,
+              }}
+            >
+              Invitations
+            </Link>
           </>
         )}
 
         {session ? (
-          <SignOutButton />
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: 8 }}>
+            {session.user?.image && (
+              <img
+                src={session.user.image}
+                alt={session.user.name || "User"}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: "50%",
+                  border: "2px solid var(--border)",
+                }}
+              />
+            )}
+            <SignOutButton />
+          </div>
         ) : (
-          <Link href="/signin">Sign In</Link>
+          <Link
+            href="/signin"
+            style={{
+              background: "#6366f1",
+              color: "white",
+              textDecoration: "none",
+              fontSize: 14,
+              fontWeight: 600,
+              padding: "8px 16px",
+              borderRadius: 8,
+              marginLeft: 8,
+            }}
+          >
+            Sign In
+          </Link>
         )}
       </div>
     </nav>

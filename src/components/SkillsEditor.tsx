@@ -39,7 +39,6 @@ export default function SkillsEditor({
       router.refresh();
     } else {
       toast.error("Failed to save skill");
-      // Revert on failure
       setSkills(skills);
     }
     setLoading(false);
@@ -61,31 +60,63 @@ export default function SkillsEditor({
       router.refresh();
     } else {
       toast.error("Failed to remove skill");
-      // Revert on failure
       setSkills(skills);
     }
     setLoading(false);
   }
 
   return (
-    <section className="border rounded-xl p-5 space-y-4">
-      <h2 className="text-2xl font-bold">My Skills</h2>
+    <div>
+      <h2
+        style={{
+          fontSize: 16,
+          fontWeight: 700,
+          color: "var(--text-primary)",
+          marginBottom: 12,
+        }}
+      >
+        My Skills
+      </h2>
 
       {/* Skills Tags */}
-      <div className="flex flex-wrap gap-2">
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
         {skills.length === 0 && (
-          <p className="text-gray-400 text-sm">No skills added yet</p>
+          <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
+            No skills added yet
+          </p>
         )}
         {skills.map((skill) => (
           <span
             key={skill}
-            className="flex items-center gap-1 bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              background: "rgba(99,102,241,0.1)",
+              color: "#818cf8",
+              border: "1px solid rgba(99,102,241,0.25)",
+              padding: "4px 12px",
+              borderRadius: 9999,
+              fontSize: 13,
+              fontWeight: 500,
+            }}
           >
             {skill}
             <button
               onClick={() => removeSkill(skill)}
               disabled={loading}
-              className="ml-1 text-indigo-400 hover:text-red-500 font-bold disabled:opacity-50"
+              style={{
+                background: "none",
+                border: "none",
+                color: "#818cf8",
+                cursor: "pointer",
+                padding: 0,
+                fontSize: 16,
+                lineHeight: 1,
+                opacity: loading ? 0.5 : 1,
+                display: "flex",
+                alignItems: "center",
+              }}
             >
               ×
             </button>
@@ -94,10 +125,19 @@ export default function SkillsEditor({
       </div>
 
       {/* Add Skill Input */}
-      <div className="flex gap-2">
+      <div style={{ display: "flex", gap: 8 }}>
         <input
-          className="border rounded-lg px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          placeholder="Add a skill (e.g. React, Python)"
+          style={{
+            flex: 1,
+            background: "var(--background)",
+            border: "1px solid var(--border)",
+            color: "var(--text-primary)",
+            borderRadius: 8,
+            padding: "9px 14px",
+            fontSize: 14,
+            outline: "none",
+          }}
+          placeholder="Add a skill (e.g. React, Python) and press Enter"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -110,11 +150,22 @@ export default function SkillsEditor({
         <button
           onClick={addSkill}
           disabled={loading}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+          style={{
+            background: "#6366f1",
+            color: "white",
+            border: "none",
+            padding: "9px 20px",
+            borderRadius: 8,
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: loading ? "not-allowed" : "pointer",
+            opacity: loading ? 0.6 : 1,
+            whiteSpace: "nowrap",
+          }}
         >
           {loading ? "Saving..." : "Add"}
         </button>
       </div>
-    </section>
+    </div>
   );
 }

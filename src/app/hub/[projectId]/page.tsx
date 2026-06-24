@@ -12,6 +12,13 @@ import Discussion from "../../../models/Discussion.model";
 import Expense from "../../../models/Expense.model";
 import HubTabs from "../../../components/HubTabs";
 
+const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
+  RECRUITING: { bg: "rgba(34,197,94,0.15)", color: "#4ade80" },
+  ACTIVE: { bg: "rgba(99,102,241,0.15)", color: "#818cf8" },
+  COMPLETED: { bg: "rgba(245,158,11,0.15)", color: "#fbbf24" },
+  ARCHIVED: { bg: "rgba(161,161,170,0.15)", color: "#a1a1aa" },
+};
+
 export default async function HubPage({
   params,
 }: {
@@ -31,9 +38,26 @@ export default async function HubPage({
 
   if (!hub) {
     return (
-      <div className="p-10">
-        <h1 className="text-3xl font-bold">Hub Not Found</h1>
-        <p className="text-gray-500 mt-2">
+      <div
+        style={{
+          maxWidth: 600,
+          margin: "80px auto",
+          padding: "0 24px",
+          textAlign: "center",
+        }}
+      >
+        <p style={{ fontSize: 48, marginBottom: 16 }}>🔒</p>
+        <h1
+          style={{
+            fontSize: 24,
+            fontWeight: 800,
+            color: "var(--text-primary)",
+            marginBottom: 8,
+          }}
+        >
+          Hub Not Found
+        </h1>
+        <p style={{ color: "var(--text-muted)", fontSize: 15 }}>
           This project does not have a team hub yet. At least 2 members need to
           join before the hub is created.
         </p>
@@ -77,16 +101,72 @@ export default async function HubPage({
   const safeDiscussions = JSON.parse(JSON.stringify(discussions));
   const safeExpenses = JSON.parse(JSON.stringify(expenses));
 
+  const status = safeHub.project?.status || "ACTIVE";
+  const statusStyle = STATUS_COLORS[status] || STATUS_COLORS.ACTIVE;
+
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold">{safeHub.project?.title} — Hub</h1>
-        <p className="text-gray-500 mt-1">{safeHub.project?.description}</p>
-        <span className="inline-block mt-2 text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 text-indigo-700">
-          {safeHub.project?.status}
-        </span>
+    <div
+      style={{
+        maxWidth: 1200,
+        margin: "0 auto",
+        padding: "40px 32px",
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          marginBottom: 32,
+          paddingBottom: 24,
+          borderBottom: "1px solid var(--border)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 8,
+          }}
+        >
+          <h1
+            style={{
+              fontSize: 28,
+              fontWeight: 800,
+              color: "var(--text-primary)",
+            }}
+          >
+            {safeHub.project?.title}
+          </h1>
+          <span
+            style={{
+              background: statusStyle.bg,
+              color: statusStyle.color,
+              padding: "3px 12px",
+              borderRadius: 9999,
+              fontSize: 12,
+              fontWeight: 600,
+            }}
+          >
+            {status}
+          </span>
+        </div>
+        <p style={{ color: "var(--text-muted)", fontSize: 14 }}>
+          {safeHub.project?.description}
+        </p>
+        <p
+          style={{
+            color: "var(--text-muted)",
+            fontSize: 13,
+            marginTop: 8,
+          }}
+        >
+          {safeHub.members?.length} member
+          {safeHub.members?.length !== 1 ? "s" : ""} · {safeTasks.length} tasks
+          · {safeMessages.length} messages
+        </p>
       </div>
 
+      {/* Tabs */}
       <HubTabs
         hub={safeHub}
         tasks={safeTasks}

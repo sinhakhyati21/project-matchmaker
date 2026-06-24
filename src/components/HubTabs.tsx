@@ -28,8 +28,12 @@ type HubTabsProps = {
   currentUserId: string;
 };
 
-const TAB_STYLE =
-  "px-4 py-2 text-sm font-medium rounded-lg transition-colors data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-gray-600 hover:text-black";
+const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
+  AVAILABLE: { bg: "rgba(34,197,94,0.15)", color: "#4ade80" },
+  BUSY: { bg: "rgba(239,68,68,0.15)", color: "#f87171" },
+  LOOKING_FOR_TEAM: { bg: "rgba(99,102,241,0.15)", color: "#818cf8" },
+  LOOKING_FOR_PROJECT: { bg: "rgba(34,211,238,0.15)", color: "#22d3ee" },
+};
 
 export default function HubTabs({
   hub,
@@ -43,57 +47,130 @@ export default function HubTabs({
 }: HubTabsProps) {
   return (
     <Tabs.Root defaultValue="members">
+
       {/* Tab List */}
-      <Tabs.List className="flex gap-2 flex-wrap border-b pb-3 mb-6">
-        <Tabs.Trigger value="members" className={TAB_STYLE}>
-          👥 Team
-        </Tabs.Trigger>
-        <Tabs.Trigger value="chat" className={TAB_STYLE}>
-          💬 Chat
-        </Tabs.Trigger>
-        <Tabs.Trigger value="kanban" className={TAB_STYLE}>
-          📋 Kanban
-        </Tabs.Trigger>
-        <Tabs.Trigger value="discussions" className={TAB_STYLE}>
-          🗣 Discussions
-        </Tabs.Trigger>
-        <Tabs.Trigger value="resources" className={TAB_STYLE}>
-          🔗 Resources
-        </Tabs.Trigger>
-        <Tabs.Trigger value="expenses" className={TAB_STYLE}>
-          💸 Expenses
-        </Tabs.Trigger>
-        <Tabs.Trigger value="reviews" className={TAB_STYLE}>
-          ⭐ Reviews
-        </Tabs.Trigger>
+      <Tabs.List
+        style={{
+          display: "flex",
+          gap: 6,
+          flexWrap: "wrap",
+          borderBottom: "1px solid var(--border)",
+          paddingBottom: 12,
+          marginBottom: 24,
+        }}
+      >
+        {[
+          { value: "members", label: "👥 Team" },
+          { value: "chat", label: "💬 Chat" },
+          { value: "kanban", label: "📋 Kanban" },
+          { value: "discussions", label: "🗣 Discussions" },
+          { value: "resources", label: "🔗 Resources" },
+          { value: "expenses", label: "💸 Expenses" },
+          { value: "reviews", label: "⭐ Reviews" },
+        ].map((tab) => (
+          <Tabs.Trigger
+            key={tab.value}
+            value={tab.value}
+            style={{
+              padding: "7px 14px",
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 500,
+              cursor: "pointer",
+              border: "1px solid transparent",
+              transition: "all 0.2s",
+              background: "transparent",
+              color: "var(--text-muted)",
+            }}
+            className="hub-tab"
+          >
+            {tab.label}
+          </Tabs.Trigger>
+        ))}
       </Tabs.List>
+
+      <style>{`
+        .hub-tab:hover {
+          color: var(--text-primary) !important;
+          background: var(--surface) !important;
+          border-color: var(--border) !important;
+        }
+        .hub-tab[data-state="active"] {
+          background: #6366f1 !important;
+          color: white !important;
+          border-color: #6366f1 !important;
+        }
+      `}</style>
 
       {/* Team Members */}
       <Tabs.Content value="members">
-        <div className="grid md:grid-cols-2 gap-4">
-          {hub.members.map((member: Member, i: number) => (
-            <div
-              key={`${member._id}-${i}`}
-              className="border rounded-xl p-4 flex gap-4 items-center"
-            >
-              {member.image && (
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="w-12 h-12 rounded-full"
-                />
-              )}
-              <div>
-                <h3 className="font-bold">{member.name}</h3>
-                <p className="text-sm text-gray-500">
-                  @{member.githubUsername || "github"}
-                </p>
-                <p className="text-sm">
-                  {member.status?.replaceAll("_", " ")}
-                </p>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: 16,
+          }}
+        >
+          {hub.members.map((member: Member, i: number) => {
+            const statusStyle =
+              STATUS_COLORS[member.status || ""] || null;
+            return (
+              <div
+                key={`${member._id}-${i}`}
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 12,
+                  padding: 16,
+                  display: "flex",
+                  gap: 14,
+                  alignItems: "center",
+                }}
+              >
+                {member.image && (
+                  <img
+                    src={member.image}
+                    alt={member.name}
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: "50%",
+                      border: "2px solid var(--border)",
+                    }}
+                  />
+                )}
+                <div>
+                  <h3
+                    style={{
+                      fontWeight: 700,
+                      fontSize: 15,
+                      color: "var(--text-primary)",
+                      marginBottom: 2,
+                    }}
+                  >
+                    {member.name}
+                  </h3>
+                  <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 6 }}>
+                    @{member.githubUsername || "github"}
+                  </p>
+                  {member.status && (
+                    <span
+                      style={{
+                        background: statusStyle?.bg || "rgba(161,161,170,0.15)",
+                        color: statusStyle?.color || "#a1a1aa",
+                        padding: "2px 8px",
+                        borderRadius: 9999,
+                        fontSize: 11,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {member.status.replaceAll("_", " ")}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Tabs.Content>
 
@@ -107,9 +184,11 @@ export default function HubTabs({
       </Tabs.Content>
 
       {/* Kanban */}
-      <Tabs.Content value="kanban" className="space-y-6">
-        <CreateTaskForm hubId={hub._id} projectId={hub.project._id} />
-        <KanbanBoard tasks={tasks} />
+      <Tabs.Content value="kanban">
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <CreateTaskForm hubId={hub._id} projectId={hub.project._id} />
+          <KanbanBoard tasks={tasks} />
+        </div>
       </Tabs.Content>
 
       {/* Discussions */}
@@ -140,36 +219,107 @@ export default function HubTabs({
       </Tabs.Content>
 
       {/* Reviews */}
-      <Tabs.Content value="reviews" className="space-y-6">
-        <ReviewForm
-          projectId={hub.project._id}
-          projectStatus={hub.project.status}
-          members={hub.members}
-          currentUserId={currentUserId}
-        />
+      <Tabs.Content value="reviews">
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          <ReviewForm
+            projectId={hub.project._id}
+            projectStatus={hub.project.status}
+            members={hub.members}
+            currentUserId={currentUserId}
+          />
 
-        <div className="space-y-3">
-          <h2 className="text-xl font-bold">Past Reviews</h2>
-          {reviews.length === 0 ? (
-            <p className="text-gray-500">No reviews yet.</p>
-          ) : (
-            reviews.map((review: any) => (
-              <div key={review._id} className="border rounded-xl p-4">
-                <p className="font-semibold">
-                  {review.reviewer?.name} reviewed {review.reviewee?.name}
+          <div>
+            <h2
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: "var(--text-primary)",
+                marginBottom: 16,
+              }}
+            >
+              Past Reviews
+            </h2>
+            {reviews.length === 0 ? (
+              <div
+                style={{
+                  background: "var(--surface)",
+                  border: "1px dashed var(--border)",
+                  borderRadius: 12,
+                  padding: 32,
+                  textAlign: "center",
+                }}
+              >
+                <p style={{ color: "var(--text-muted)", fontSize: 14 }}>
+                  No reviews yet. Mark project as Completed to unlock reviews.
                 </p>
-                <p className="text-sm mt-2 text-gray-600">
-                  Communication: {review.communication}/5 &nbsp;·&nbsp;
-                  Technical: {review.technicalSkills}/5 &nbsp;·&nbsp;
-                  Reliability: {review.reliability}/5 &nbsp;·&nbsp;
-                  Teamwork: {review.teamwork}/5
-                </p>
-                {review.comment && (
-                  <p className="text-gray-600 mt-2 italic">"{review.comment}"</p>
-                )}
               </div>
-            ))
-          )}
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {reviews.map((review: any) => (
+                  <div
+                    key={review._id}
+                    style={{
+                      background: "var(--surface)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 12,
+                      padding: 16,
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontWeight: 600,
+                        fontSize: 14,
+                        color: "var(--text-primary)",
+                        marginBottom: 8,
+                      }}
+                    >
+                      {review.reviewer?.name} reviewed {review.reviewee?.name}
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 8,
+                        marginBottom: 8,
+                      }}
+                    >
+                      {[
+                        { label: "Communication", value: review.communication },
+                        { label: "Technical", value: review.technicalSkills },
+                        { label: "Reliability", value: review.reliability },
+                        { label: "Teamwork", value: review.teamwork },
+                      ].map((r) => (
+                        <span
+                          key={r.label}
+                          style={{
+                            background: "rgba(99,102,241,0.1)",
+                            color: "#818cf8",
+                            border: "1px solid rgba(99,102,241,0.2)",
+                            padding: "3px 10px",
+                            borderRadius: 9999,
+                            fontSize: 12,
+                          }}
+                        >
+                          {r.label}: {r.value}/5
+                        </span>
+                      ))}
+                    </div>
+                    {review.comment && (
+                      <p
+                        style={{
+                          fontSize: 13,
+                          color: "var(--text-muted)",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        "{review.comment}"
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </Tabs.Content>
     </Tabs.Root>
