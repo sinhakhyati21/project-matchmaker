@@ -17,21 +17,30 @@ const CATEGORIES = [
   "Other",
 ];
 
-export default function ProjectForm() {
+export default function EditProjectForm({ project }: { project: any }) {
   const router = useRouter();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("");
-  const [customCategory, setCustomCategory] = useState("");
-  const [skills, setSkills] = useState("");
-  const [roles, setRoles] = useState("");
-  const [teamSize, setTeamSize] = useState(2);
+  const [title, setTitle] = useState(project.title || "");
+  const [description, setDescription] = useState(project.description || "");
+  const [category, setCategory] = useState(
+    CATEGORIES.includes(project.category) ? project.category : "Other"
+  );
+  const [customCategory, setCustomCategory] = useState(
+    CATEGORIES.includes(project.category) ? "" : project.category
+  );
+  const [skills, setSkills] = useState(
+    (project.requiredSkills || []).join(", ")
+  );
+  const [roles, setRoles] = useState(
+    (project.requiredRoles || []).join(", ")
+  );
+  const [teamSize, setTeamSize] = useState(project.maxTeamSize || 2);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    const finalCategory = category === "Other" ? customCategory.trim() : category;
+    const finalCategory =
+      category === "Other" ? customCategory.trim() : category;
 
     if (!title.trim()) { toast.error("Title is required"); return; }
     if (!description.trim()) { toast.error("Description is required"); return; }
@@ -40,28 +49,35 @@ export default function ProjectForm() {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/projects", {
-        method: "POST",
+      const res = await fetch(`/api/projects/${project._id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           description,
           category: finalCategory,
-          requiredSkills: skills.split(",").map((s: string) => s.trim()).filter(Boolean),
-          requiredRoles: roles.split(",").map((r: string) => r.trim()).filter(Boolean),
+          requiredSkills: skills
+            .split(",")
+            .map((s: string) => s.trim())
+            .filter(Boolean),
+          requiredRoles: roles
+            .split(",")
+            .map((r: string) => r.trim())
+            .filter(Boolean),
           maxTeamSize: teamSize,
         }),
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        toast.success("Project created successfully!");
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Project updated!");
         router.push("/dashboard");
+        router.refresh();
       } else {
-        toast.error(data.error || data.message || "Failed to create project");
+        toast.error(data.message || "Failed to update project");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "An error occurred");
+      toast.error("An error occurred");
     } finally {
       setLoading(false);
     }
@@ -121,13 +137,13 @@ export default function ProjectForm() {
         <label style={labelStyle}>Description *</label>
         <textarea
           style={{ ...inputStyle, minHeight: 100, resize: "vertical" as const }}
-          placeholder="Describe your project idea, goals, and what you are building..."
+          placeholder="Describe your project..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
 
-{/* Category */}
+      {/* Category */}
 <div>
   <label style={labelStyle}>Category *</label>
   <select
@@ -184,7 +200,7 @@ export default function ProjectForm() {
         <label style={labelStyle}>Required Skills *</label>
         <input
           style={inputStyle}
-          placeholder="React, Node.js, MongoDB, Python..."
+          placeholder="React, Node.js, MongoDB..."
           value={skills}
           onChange={(e) => setSkills(e.target.value)}
         />
@@ -196,7 +212,7 @@ export default function ProjectForm() {
         <label style={labelStyle}>Required Roles</label>
         <input
           style={inputStyle}
-          placeholder="Frontend Developer, Backend Developer, Designer..."
+          placeholder="Frontend Developer, Backend Developer..."
           value={roles}
           onChange={(e) => setRoles(e.target.value)}
         />
@@ -217,24 +233,41 @@ export default function ProjectForm() {
         <p style={hintStyle}>Minimum 2, maximum 20</p>
       </div>
 
-      {/* Submit */}
-      <button
-        type="submit"
-        disabled={loading}
-        style={{
-          background: loading ? "var(--border)" : "#6366f1",
-          color: "white",
-          border: "none",
-          padding: "12px 24px",
-          borderRadius: 10,
-          fontSize: 15,
-          fontWeight: 700,
-          cursor: loading ? "not-allowed" : "pointer",
-          alignSelf: "flex-start" as const,
-        }}
-      >
-        {loading ? "Creating..." : "Create Project"}
-      </button>
+      {/* Buttons */}
+      <div style={{ display: "flex", gap: 12 }}>
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            background: loading ? "var(--border)" : "#6366f1",
+            color: "white",
+            border: "none",
+            padding: "12px 24px",
+            borderRadius: 10,
+            fontSize: 15,
+            fontWeight: 700,
+            cursor: loading ? "not-allowed" : "pointer",
+          }}
+        >
+          {loading ? "Saving..." : "Save Changes"}
+        </button>
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard")}
+          style={{
+            background: "transparent",
+            color: "var(--text-muted)",
+            border: "1px solid var(--border)",
+            padding: "12px 24px",
+            borderRadius: 10,
+            fontSize: 15,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          Cancel
+        </button>
+      </div>
     </form>
   );
 }
