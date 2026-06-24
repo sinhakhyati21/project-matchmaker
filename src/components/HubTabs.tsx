@@ -62,7 +62,7 @@ export default function HubTabs({
       >
         {[
           { value: "members", label: "👥 Team" },
-          { value: "chat", label: "💬 Chat" },
+          { value: "chat", label: `💬 Chat${messages.length > 0 ? ` (${messages.length})` : ""}` },
           { value: "kanban", label: "📋 Kanban" },
           { value: "discussions", label: "🗣 Discussions" },
           { value: "resources", label: "🔗 Resources" },

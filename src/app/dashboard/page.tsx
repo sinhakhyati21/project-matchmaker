@@ -7,6 +7,7 @@ import ApplicationActions from "../../components/ApplicationActions";
 import ProjectStatusActions from "../../components/ProjectStatusActions";
 import TeamRecommendations from "../../components/TeamRecommendations";
 import DashboardActions from "../../components/DashboardActions";
+import MyApplications from "../../components/MyApplications";
 
 const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
   RECRUITING: { bg: "rgba(34,197,94,0.1)", color: "#4ade80" },
@@ -68,7 +69,7 @@ export default async function DashboardPage() {
           Manage your projects and team applications.
         </p>
       </div>
-
+      <MyApplications />
       {/* Stats Row — subtle, professional */}
       <div
         style={{
