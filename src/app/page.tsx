@@ -100,47 +100,6 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section
-        style={{
-          borderTop: "1px solid var(--border)",
-          borderBottom: "1px solid var(--border)",
-          padding: "24px",
-          background: "var(--surface)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 900,
-            margin: "0 auto",
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 24,
-            textAlign: "center",
-          }}
-        >
-          {[
-            { label: "Active Projects", value: "100+" },
-            { label: "Team Matches Made", value: "500+" },
-            { label: "Trust Reviews", value: "200+" },
-          ].map((stat) => (
-            <div key={stat.label}>
-              <p
-                style={{
-                  fontSize: 28,
-                  fontWeight: 800,
-                  color: "#6366f1",
-                }}
-              >
-                {stat.value}
-              </p>
-              <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* Features */}
       <section style={{ padding: "80px 24px", maxWidth: 1100, margin: "0 auto" }}>

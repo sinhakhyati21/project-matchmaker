@@ -14,6 +14,8 @@ type Recommendation = {
   score: number;
   skillScore: number;
   activityScore: number;
+  repoScore: number;
+  experienceScore: number;
   trustScore: {
     average: number;
     count: number;
@@ -126,24 +128,30 @@ export default function TeamRecommendations({
                 </div>
 
                 {/* Right: Score */}
-                <div className="text-right min-w-[120px]">
-                  <p className="font-bold text-2xl text-indigo-600">
-                    {user.score}
-                  </p>
-                  <p className="text-xs text-gray-500">total score</p>
-                  <p className="text-xs mt-1 text-gray-500">
-                    Skills: {user.skillScore}/80
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Activity: {user.activityScore}/20
-                  </p>
-                  <p className="text-xs mt-1">
-                    Trust:{" "}
-                    {user.trustScore.count === 0
-                      ? "No reviews"
-                      : `${user.trustScore.average}/5`}
-                  </p>
-                </div>
+<div className="text-right min-w-[120px]">
+  <p className="font-bold text-2xl text-indigo-600">
+    {user.score}
+  </p>
+  <p className="text-xs text-gray-500">total score</p>
+  <p className="text-xs mt-1 text-gray-500">
+    Skills: {user.skillScore}/80
+  </p>
+  <p className="text-xs text-gray-500">
+    Activity: {user.activityScore}/20
+  </p>
+  <p className="text-xs text-gray-500">
+    Repos: {user.repoScore}/20
+  </p>
+  <p className="text-xs text-gray-500">
+    Experience: {user.experienceScore}/10
+  </p>
+  <p className="text-xs mt-1">
+    Trust:{" "}
+    {user.trustScore.count === 0
+      ? "No reviews"
+      : `${user.trustScore.average}/5`}
+  </p>
+</div>
               </div>
 
               {/* Invite Button */}
