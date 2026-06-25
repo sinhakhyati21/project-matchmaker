@@ -45,7 +45,10 @@ export default function ProjectsClient({
       const matchesSearch =
         search.trim() === "" ||
         project.title.toLowerCase().includes(search.toLowerCase()) ||
-        project.description.toLowerCase().includes(search.toLowerCase());
+        project.description.toLowerCase().includes(search.toLowerCase()) ||
+        project.requiredSkills.some((skill: string) =>
+        skill.toLowerCase().includes(search.toLowerCase())
+      );
 
       const matchesCategory =
         selectedCategory === "ALL" || project.category === selectedCategory;
