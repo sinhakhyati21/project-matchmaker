@@ -6,11 +6,9 @@ import User from "./models/User.model";
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   secret: process.env.AUTH_SECRET,
-
   session: {
     strategy: "jwt",
   },
-
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID!,
@@ -22,24 +20,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
-
   pages: {
     error: "/signin",
   },
-
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
         await connectDB();
-
         const githubProfile = profile as {
           login?: string;
           bio?: string;
           html_url?: string;
         };
-
-        if (!user.email) return false;
-
+        if (!user.email) return true;
         await User.findOneAndUpdate(
           { email: user.email },
           {
@@ -51,23 +44,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             githubUrl: githubProfile.html_url,
             githubAccessToken: account?.access_token,
           },
-          { upsert: true, new: true }
+          { upsert: true, returnDocument: "after" }
         );
-
         return true;
       } catch (error) {
         console.error("Error saving user:", error);
-        return false;
+        return true;
       }
     },
 
     async jwt({ token }) {
       try {
         await connectDB();
-
         if (token.email) {
           const dbUser = await User.findOne({ email: token.email });
-
           if (dbUser) {
             token.id = dbUser._id.toString();
           }
@@ -75,7 +65,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       } catch (error) {
         console.error("JWT callback error:", error);
       }
-
       return token;
     },
 
@@ -83,7 +72,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user && token.id) {
         session.user.id = token.id as string;
       }
-
       return session;
     },
   },
