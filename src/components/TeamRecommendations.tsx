@@ -93,14 +93,7 @@ export default function TeamRecommendations({
         }}
       >
         <div>
-          <p
-            style={{
-              fontSize: 13,
-              fontWeight: 600,
-              color: "var(--text-primary)",
-              marginBottom: 2,
-            }}
-          >
+          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 2 }}>
             AI Team Recommendations
           </p>
           <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
@@ -161,22 +154,27 @@ export default function TeamRecommendations({
                     <img
                       src={user.image}
                       alt={user.name}
+                      onClick={() => user.githubUsername && window.open(`/users/${user.githubUsername}`, "_blank")}
                       style={{
                         width: 36,
                         height: 36,
                         borderRadius: "50%",
                         border: "1px solid var(--border)",
                         flexShrink: 0,
+                        cursor: user.githubUsername ? "pointer" : "default",
                       }}
                     />
                   )}
                   <div>
                     <p
+                      onClick={() => user.githubUsername && window.open(`/users/${user.githubUsername}`, "_blank")}
                       style={{
                         fontSize: 13,
                         fontWeight: 600,
-                        color: "var(--text-primary)",
+                        color: user.githubUsername ? "#6366f1" : "var(--text-primary)",
                         marginBottom: 2,
+                        cursor: user.githubUsername ? "pointer" : "default",
+                        textDecoration: user.githubUsername ? "underline" : "none",
                       }}
                     >
                       {user.name}
@@ -194,36 +192,18 @@ export default function TeamRecommendations({
 
                 {/* Right: Score */}
                 <div style={{ textAlign: "right", flexShrink: 0 }}>
-                  <p
-                    style={{
-                      fontSize: 20,
-                      fontWeight: 800,
-                      color: "#6366f1",
-                      lineHeight: 1,
-                    }}
-                  >
+                  <p style={{ fontSize: 20, fontWeight: 800, color: "#6366f1", lineHeight: 1 }}>
                     {user.score}
                   </p>
-                  <p style={{ fontSize: 10, color: "var(--text-muted)" }}>
-                    score
-                  </p>
-                  <div
-                    style={{
-                      fontSize: 10,
-                      color: "var(--text-muted)",
-                      marginTop: 4,
-                      lineHeight: 1.6,
-                    }}
-                  >
+                  <p style={{ fontSize: 10, color: "var(--text-muted)" }}>score</p>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.6 }}>
                     <div>Skills {user.skillScore}/80</div>
                     <div>Activity {user.activityScore}/20</div>
                     <div>Repos {user.repoScore}/20</div>
                     <div>Exp {user.experienceScore}/10</div>
                     <div>
                       Trust:{" "}
-                      {user.trustScore.count === 0
-                        ? "—"
-                        : `${user.trustScore.average}/5`}
+                      {user.trustScore.count === 0 ? "—" : `${user.trustScore.average}/5`}
                     </div>
                   </div>
                 </div>
@@ -232,9 +212,7 @@ export default function TeamRecommendations({
               {/* Invite Button */}
               <button
                 onClick={() => sendInvitation(user._id)}
-                disabled={
-                  invitedIds.includes(user._id) || invitingId === user._id
-                }
+                disabled={invitedIds.includes(user._id) || invitingId === user._id}
                 style={{
                   width: "100%",
                   background: invitedIds.includes(user._id)
@@ -254,8 +232,7 @@ export default function TeamRecommendations({
                     invitedIds.includes(user._id) || invitingId === user._id
                       ? "not-allowed"
                       : "pointer",
-                  opacity:
-                    invitingId === user._id ? 0.6 : 1,
+                  opacity: invitingId === user._id ? 0.6 : 1,
                 }}
               >
                 {invitedIds.includes(user._id)

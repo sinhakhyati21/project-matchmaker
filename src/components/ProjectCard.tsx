@@ -156,13 +156,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             </span>
           ))}
           {project.requiredSkills.length > 5 && (
-            <span
-              style={{
-                color: "var(--text-muted)",
-                fontSize: 12,
-                padding: "2px 6px",
-              }}
-            >
+            <span style={{ color: "var(--text-muted)", fontSize: 12, padding: "2px 6px" }}>
               +{project.requiredSkills.length - 5} more
             </span>
           )}
@@ -171,28 +165,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
       {/* Team Progress */}
       <div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: 6,
-          }}
-        >
-          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-            Team Progress
-          </span>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Team Progress</span>
           <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
             {memberCount}/{project.maxTeamSize} members
           </span>
         </div>
-        <div
-          style={{
-            height: 4,
-            background: "var(--border)",
-            borderRadius: 9999,
-            overflow: "hidden",
-          }}
-        >
+        <div style={{ height: 4, background: "var(--border)", borderRadius: 9999, overflow: "hidden" }}>
           <div
             style={{
               height: "100%",
@@ -205,8 +184,15 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         </div>
       </div>
 
-      {/* Owner */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      {/* Owner — clickable */}
+      <div
+        style={{ display: "flex", alignItems: "center", gap: 8, cursor: project.owner?.githubUsername ? "pointer" : "default" }}
+        onClick={() => {
+          if (project.owner?.githubUsername) {
+            window.open(`/users/${project.owner.githubUsername}`, "_blank");
+          }
+        }}
+      >
         {project.owner?.image && (
           <img
             src={project.owner.image}
@@ -219,7 +205,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             }}
           />
         )}
-        <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
+        <span
+          style={{
+            fontSize: 13,
+            color: project.owner?.githubUsername ? "#6366f1" : "var(--text-muted)",
+            textDecoration: project.owner?.githubUsername ? "underline" : "none",
+          }}
+        >
           {project.owner?.name || project.owner?.githubUsername || "Unknown"}
         </span>
       </div>
