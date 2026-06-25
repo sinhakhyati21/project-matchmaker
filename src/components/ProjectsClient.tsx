@@ -29,7 +29,6 @@ export default function ProjectsClient({
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [selectedSkill, setSelectedSkill] = useState("ALL");
 
-  // Derive unique categories and skills from projects
   const categories = useMemo(() => {
     const cats = projects.map((p) => p.category).filter(Boolean);
     return ["ALL", ...Array.from(new Set(cats))];
@@ -47,8 +46,8 @@ export default function ProjectsClient({
         project.title.toLowerCase().includes(search.toLowerCase()) ||
         project.description.toLowerCase().includes(search.toLowerCase()) ||
         project.requiredSkills.some((skill: string) =>
-        skill.toLowerCase().includes(search.toLowerCase())
-      );
+          skill.toLowerCase().includes(search.toLowerCase())
+        );
 
       const matchesCategory =
         selectedCategory === "ALL" || project.category === selectedCategory;
@@ -67,7 +66,7 @@ export default function ProjectsClient({
       <div className="flex flex-col md:flex-row gap-4">
         <input
           type="text"
-          placeholder="Search projects..."
+          placeholder="Search by title, description or skill..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="border rounded-xl px-4 py-2 w-full md:w-96 focus:outline-none focus:ring-2 focus:ring-indigo-400"
@@ -97,28 +96,45 @@ export default function ProjectsClient({
       </div>
 
       {/* Results Count */}
-        <p
-          style={{
-            fontSize: 13,
-            color: "var(--text-muted)",
-            padding: "10px 0",
-            borderTop: "1px solid var(--border)",
-            borderBottom: "1px solid var(--border)",
-            marginTop: 4,
-          }}
-        >
-          Showing{" "}
-          <span style={{ color: "#6366f1", fontWeight: 600 }}>
-            {filtered.length}
-          </span>{" "}
-          of {projects.length} projects
+      <p
+        style={{
+          fontSize: 13,
+          color: "var(--text-muted)",
+          padding: "10px 0",
+          borderTop: "1px solid var(--border)",
+          borderBottom: "1px solid var(--border)",
+          marginTop: 4,
+        }}
+      >
+        Showing{" "}
+        <span style={{ color: "#6366f1", fontWeight: 600 }}>
+          {filtered.length}
+        </span>{" "}
+        of {projects.length} projects
       </p>
 
       {/* Project Grid */}
       {filtered.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-2xl font-bold text-gray-300">No projects found</p>
-          <p className="text-gray-400 mt-2">
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px dashed var(--border)",
+            borderRadius: 16,
+            padding: 64,
+            textAlign: "center",
+          }}
+        >
+          <p
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              color: "var(--text-primary)",
+              marginBottom: 8,
+            }}
+          >
+            No projects found
+          </p>
+          <p style={{ color: "var(--text-muted)", fontSize: 14 }}>
             Try adjusting your search or filters
           </p>
         </div>

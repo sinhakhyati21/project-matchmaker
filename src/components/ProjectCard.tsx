@@ -184,9 +184,14 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         </div>
       </div>
 
-      {/* Owner — clickable */}
+      {/* Owner */}
       <div
-        style={{ display: "flex", alignItems: "center", gap: 8, cursor: project.owner?.githubUsername ? "pointer" : "default" }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          cursor: project.owner?.githubUsername ? "pointer" : "default",
+        }}
         onClick={() => {
           if (project.owner?.githubUsername) {
             window.open(`/users/${project.owner.githubUsername}`, "_blank");
@@ -218,8 +223,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
       {/* Apply Button */}
       <button
-        onClick={applyToProject}
-        disabled={loading || applied}
+        onClick={applied ? undefined : applyToProject}
+        disabled={applied || loading}
         style={{
           background: applied ? "rgba(34,197,94,0.15)" : "#6366f1",
           color: applied ? "#4ade80" : "white",
@@ -228,18 +233,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           borderRadius: 8,
           fontWeight: 600,
           fontSize: 14,
-          cursor: loading || applied ? "not-allowed" : "pointer",
+          cursor: applied || loading ? "not-allowed" : "pointer",
           opacity: loading ? 0.7 : 1,
           transition: "all 0.2s",
         }}
       >
-        {applied
-          ? "✓ Applied"
-          : loading
-          ? "Applying..."
-          : session
-          ? "Apply to Project"
-          : "Sign in to Apply"}
+        {applied ? "✓ Applied" : loading ? "Applying..." : session ? "Apply to Project" : "Sign in to Apply"}
       </button>
     </div>
   );
