@@ -6,6 +6,11 @@ import User from "./models/User.model";
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   secret: process.env.AUTH_SECRET,
+
+  session: {
+    strategy: "jwt",
+  },
+
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID!,
@@ -17,18 +22,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+
   pages: {
     error: "/signin",
   },
+
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
         await connectDB();
+
         const githubProfile = profile as {
           login?: string;
           bio?: string;
           html_url?: string;
         };
+
+        if (!user.email) return false;
+
         await User.findOneAndUpdate(
           { email: user.email },
           {
@@ -42,27 +53,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           },
           { upsert: true, new: true }
         );
+
         return true;
       } catch (error) {
         console.error("Error saving user:", error);
-        return true;
+        return false;
       }
     },
 
-    async session({ session, token }) {
-      if (session.user) {
-        try {
-          await connectDB();
-          const dbUser = await User.findOne({ email: session.user.email });
+    async jwt({ token }) {
+      try {
+        await connectDB();
+
+        if (token.email) {
+          const dbUser = await User.findOne({ email: token.email });
+
           if (dbUser) {
-            session.user.id = dbUser._id.toString();
-          } else {
-            session.user.id = token.sub!;
+            token.id = dbUser._id.toString();
           }
-        } catch {
-          session.user.id = token.sub!;
         }
+      } catch (error) {
+        console.error("JWT callback error:", error);
       }
+
+      return token;
+    },
+
+    async session({ session, token }) {
+      if (session.user && token.id) {
+        session.user.id = token.id as string;
+      }
+
       return session;
     },
   },

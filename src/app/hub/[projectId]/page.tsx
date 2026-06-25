@@ -25,7 +25,7 @@ export default async function HubPage({
   params: Promise<{ projectId: string }>;
 }) {
   const session = await auth();
-  if (!session) {
+  if (!session || !require("mongoose").Types.ObjectId.isValid(session.user.id)) {
     redirect("/signin");
   }
 

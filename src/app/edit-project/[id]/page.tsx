@@ -10,7 +10,7 @@ export default async function EditProjectPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await auth();
-  if (!session) {
+  if (!session || !require("mongoose").Types.ObjectId.isValid(session.user.id)) {
     redirect("/signin");
   }
 
