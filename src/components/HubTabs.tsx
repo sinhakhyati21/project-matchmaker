@@ -9,6 +9,7 @@ import ExpenseTracker from "./ExpenseTracker";
 import ReviewForm from "./ReviewForm";
 import CreateTaskForm from "./CreateTaskForm";
 import ProjectAnalytics from "./ProjectAnalytics";
+import { useState } from "react";
 
 type Member = {
   _id: string;
@@ -18,9 +19,16 @@ type Member = {
   status?: string;
 };
 
+type Task = {
+  _id: string;
+  title: string;
+  description?: string;
+  status: "TODO" | "IN_PROGRESS" | "REVIEW" | "DONE";
+};
+
 type HubTabsProps = {
   hub: any;
-  tasks: any[];
+  tasks: Task[];
   resources: any[];
   messages: any[];
   reviews: any[];
@@ -38,7 +46,7 @@ const STATUS_COLORS: Record<string, { bg: string; color: string }> = {
 
 export default function HubTabs({
   hub,
-  tasks,
+  tasks: initialTasks,
   resources,
   messages,
   reviews,
@@ -46,10 +54,15 @@ export default function HubTabs({
   expenses,
   currentUserId,
 }: HubTabsProps) {
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+
+  function handleTaskCreated(newTask: Task) {
+    setTasks((prev) => [newTask, ...prev]);
+  }
+
   return (
     <Tabs.Root defaultValue="members">
 
-      {/* Tab List */}
       <Tabs.List
         style={{
           display: "flex",
@@ -90,99 +103,72 @@ export default function HubTabs({
         ))}
       </Tabs.List>
 
-      <style>{`
-        .hub-tab:hover {
-          color: var(--text-primary) !important;
-          background: var(--surface) !important;
-          border-color: var(--border) !important;
-        }
-        .hub-tab[data-state="active"] {
-          background: #6366f1 !important;
-          color: white !important;
-          border-color: #6366f1 !important;
-        }
-      `}</style>
-
       {/* Team Members */}
-<Tabs.Content value="members">
-  <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-        gap: 16,
-      }}
-    >
-      {hub.members.map((member: Member, i: number) => {
-        const statusStyle = STATUS_COLORS[member.status || ""] || null;
-        return (
+      <Tabs.Content value="members">
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           <div
-            key={`${member._id}-${i}`}
             style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: 12,
-              padding: 16,
-              display: "flex",
-              gap: 14,
-              alignItems: "center",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gap: 16,
             }}
           >
-            {member.image && (
-              <img
-                src={member.image}
-                alt={member.name}
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: "50%",
-                  border: "2px solid var(--border)",
-                }}
-              />
-            )}
-            <div>
-              <h3
-                style={{
-                  fontWeight: 700,
-                  fontSize: 15,
-                  color: "var(--text-primary)",
-                  marginBottom: 2,
-                }}
-              >
-                {member.name}
-              </h3>
-              <p
-                style={{
-                  fontSize: 12,
-                  color: "var(--text-muted)",
-                  marginBottom: 6,
-                }}
-              >
-                @{member.githubUsername || "github"}
-              </p>
-              {member.status && (
-                <span
+            {hub.members.map((member: Member, i: number) => {
+              const statusStyle = STATUS_COLORS[member.status || ""] || null;
+              return (
+                <div
+                  key={`${member._id}-${i}`}
                   style={{
-                    background:
-                      statusStyle?.bg || "rgba(161,161,170,0.15)",
-                    color: statusStyle?.color || "#a1a1aa",
-                    padding: "2px 8px",
-                    borderRadius: 9999,
-                    fontSize: 11,
-                    fontWeight: 500,
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 12,
+                    padding: 16,
+                    display: "flex",
+                    gap: 14,
+                    alignItems: "center",
                   }}
                 >
-                  {member.status.replaceAll("_", " ")}
-                </span>
-              )}
-            </div>
+                  {member.image && (
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: "50%",
+                        border: "2px solid var(--border)",
+                      }}
+                    />
+                  )}
+                  <div>
+                    <h3 style={{ fontWeight: 700, fontSize: 15, color: "var(--text-primary)", marginBottom: 2 }}>
+                      {member.name}
+                    </h3>
+                    <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 6 }}>
+                      @{member.githubUsername || "github"}
+                    </p>
+                    {member.status && (
+                      <span
+                        style={{
+                          background: statusStyle?.bg || "rgba(161,161,170,0.15)",
+                          color: statusStyle?.color || "#a1a1aa",
+                          padding: "2px 8px",
+                          borderRadius: 9999,
+                          fontSize: 11,
+                          fontWeight: 500,
+                        }}
+                      >
+                        {member.status.replaceAll("_", " ")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
-    </div>
-    <ProjectAnalytics projectId={hub.project._id} />
-  </div>
-</Tabs.Content>
+          <ProjectAnalytics projectId={hub.project._id} />
+        </div>
+      </Tabs.Content>
 
       {/* Chat */}
       <Tabs.Content value="chat">
@@ -190,14 +176,19 @@ export default function HubTabs({
           hubId={hub._id}
           projectId={hub.project._id}
           messages={messages}
+          currentUserId={currentUserId}
         />
       </Tabs.Content>
 
       {/* Kanban */}
       <Tabs.Content value="kanban">
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <CreateTaskForm hubId={hub._id} projectId={hub.project._id} />
-          <KanbanBoard tasks={tasks} />
+          <CreateTaskForm
+            hubId={hub._id}
+            projectId={hub.project._id}
+            onTaskCreated={handleTaskCreated}
+          />
+          <KanbanBoard tasks={tasks} onTasksChange={setTasks} />
         </div>
       </Tabs.Content>
 
@@ -237,28 +228,12 @@ export default function HubTabs({
             members={hub.members}
             currentUserId={currentUserId}
           />
-
           <div>
-            <h2
-              style={{
-                fontSize: 18,
-                fontWeight: 700,
-                color: "var(--text-primary)",
-                marginBottom: 16,
-              }}
-            >
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: "var(--text-primary)", marginBottom: 16 }}>
               Past Reviews
             </h2>
             {reviews.length === 0 ? (
-              <div
-                style={{
-                  background: "var(--surface)",
-                  border: "1px dashed var(--border)",
-                  borderRadius: 12,
-                  padding: 32,
-                  textAlign: "center",
-                }}
-              >
+              <div style={{ background: "var(--surface)", border: "1px dashed var(--border)", borderRadius: 12, padding: 32, textAlign: "center" }}>
                 <p style={{ color: "var(--text-muted)", fontSize: 14 }}>
                   No reviews yet. Mark project as Completed to unlock reviews.
                 </p>
@@ -266,33 +241,11 @@ export default function HubTabs({
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {reviews.map((review: any) => (
-                  <div
-                    key={review._id}
-                    style={{
-                      background: "var(--surface)",
-                      border: "1px solid var(--border)",
-                      borderRadius: 12,
-                      padding: 16,
-                    }}
-                  >
-                    <p
-                      style={{
-                        fontWeight: 600,
-                        fontSize: 14,
-                        color: "var(--text-primary)",
-                        marginBottom: 8,
-                      }}
-                    >
+                  <div key={review._id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: 16 }}>
+                    <p style={{ fontWeight: 600, fontSize: 14, color: "var(--text-primary)", marginBottom: 8 }}>
                       {review.reviewer?.name} reviewed {review.reviewee?.name}
                     </p>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 8,
-                        marginBottom: 8,
-                      }}
-                    >
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
                       {[
                         { label: "Communication", value: review.communication },
                         { label: "Technical", value: review.technicalSkills },
@@ -315,13 +268,7 @@ export default function HubTabs({
                       ))}
                     </div>
                     {review.comment && (
-                      <p
-                        style={{
-                          fontSize: 13,
-                          color: "var(--text-muted)",
-                          fontStyle: "italic",
-                        }}
-                      >
+                      <p style={{ fontSize: 13, color: "var(--text-muted)", fontStyle: "italic" }}>
                         "{review.comment}"
                       </p>
                     )}

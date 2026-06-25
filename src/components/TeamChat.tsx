@@ -19,10 +19,12 @@ export default function TeamChat({
   hubId,
   projectId,
   messages: initialMessages,
+  currentUserId,
 }: {
   hubId: string;
   projectId: string;
   messages: Message[];
+  currentUserId: string;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -34,7 +36,6 @@ export default function TeamChat({
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // SSE connection
   useEffect(() => {
     const es = new EventSource(`/api/messages/stream?hubId=${hubId}`);
     es.onmessage = (e) => {
@@ -48,13 +49,15 @@ export default function TeamChat({
           return [...prev, data.message];
         });
       } else if (data.type === "typing") {
+        // Ignore own typing events
+        if (data.userId === currentUserId) return;
         setIsTyping(true);
         setTimeout(() => setIsTyping(false), 3000);
       }
     };
     es.onerror = () => es.close();
     return () => es.close();
-  }, [hubId]);
+  }, [hubId, currentUserId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -116,14 +119,7 @@ export default function TeamChat({
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 16,
-      }}
-    >
-      {/* Messages */}
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div
         style={{
           background: "var(--background)",
@@ -152,14 +148,7 @@ export default function TeamChat({
                 padding: "12px 14px",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  marginBottom: 8,
-                }}
-              >
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                 {message.sender?.image && (
                   <img
                     src={message.sender.image}
@@ -174,13 +163,7 @@ export default function TeamChat({
                   />
                 )}
                 <div>
-                  <p
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: "var(--text-primary)",
-                    }}
-                  >
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
                     {message.sender?.name || "Unknown"}
                   </p>
                   <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
@@ -188,11 +171,9 @@ export default function TeamChat({
                   </p>
                 </div>
               </div>
-
               <p style={{ fontSize: 14, color: "var(--text-primary)", lineHeight: 1.5 }}>
                 {message.content}
               </p>
-
               {message.imageUrl && (
                 <img
                   src={message.imageUrl}
@@ -206,7 +187,6 @@ export default function TeamChat({
                   }}
                 />
               )}
-
               <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
                 {new Date(message.createdAt).toLocaleString("en-IN", {
                   dateStyle: "short",
@@ -218,14 +198,7 @@ export default function TeamChat({
         )}
 
         {isTyping && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "0 4px",
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "0 4px" }}>
             <span style={{ display: "flex", gap: 3 }}>
               {[0, 150, 300].map((delay) => (
                 <span
@@ -247,11 +220,9 @@ export default function TeamChat({
             </span>
           </div>
         )}
-
         <div ref={bottomRef} />
       </div>
 
-      {/* Input Form */}
       <form onSubmit={sendMessage} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         <textarea
           style={{ ...inputStyle, minHeight: 72, resize: "vertical" as const }}
@@ -264,39 +235,17 @@ export default function TeamChat({
         />
 
         {imageUrl && (
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: 10,
-              padding: 12,
-            }}
-          >
-            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
-              Image preview
-            </p>
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: 12 }}>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>Image preview</p>
             <img
               src={imageUrl}
               alt="Preview"
-              style={{
-                maxHeight: 180,
-                borderRadius: 8,
-                border: "1px solid var(--border)",
-                objectFit: "contain",
-              }}
+              style={{ maxHeight: 180, borderRadius: 8, border: "1px solid var(--border)", objectFit: "contain" }}
             />
             <button
               type="button"
               onClick={() => setImageUrl("")}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#f87171",
-                fontSize: 13,
-                cursor: "pointer",
-                marginTop: 8,
-                padding: 0,
-              }}
+              style={{ background: "none", border: "none", color: "#f87171", fontSize: 13, cursor: "pointer", marginTop: 8, padding: 0 }}
             >
               Remove image
             </button>
@@ -304,30 +253,11 @@ export default function TeamChat({
         )}
 
         {showImageOptions && (
-          <div
-            style={{
-              background: "var(--surface)",
-              border: "1px solid var(--border)",
-              borderRadius: 10,
-              padding: 12,
-              display: "flex",
-              flexDirection: "column" as const,
-              gap: 8,
-            }}
-          >
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: 12, display: "flex", flexDirection: "column" as const, gap: 8 }}>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              style={{
-                background: "var(--background)",
-                border: "1px solid var(--border)",
-                color: "var(--text-primary)",
-                padding: "8px 14px",
-                borderRadius: 8,
-                fontSize: 13,
-                cursor: "pointer",
-                textAlign: "left" as const,
-              }}
+              style={{ background: "var(--background)", border: "1px solid var(--border)", color: "var(--text-primary)", padding: "8px 14px", borderRadius: 8, fontSize: 13, cursor: "pointer", textAlign: "left" as const }}
             >
               Upload image from device
             </button>

@@ -7,9 +7,11 @@ import { toast } from "sonner";
 export default function CreateTaskForm({
   hubId,
   projectId,
+  onTaskCreated,
 }: {
   hubId: string;
   projectId: string;
+  onTaskCreated?: (task: any) => void;
 }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
@@ -31,9 +33,11 @@ export default function CreateTaskForm({
     });
 
     if (res.ok) {
+      const newTask = await res.json();
       toast.success("Task created!");
       setTitle("");
       setDescription("");
+      if (onTaskCreated) onTaskCreated(newTask);
       router.refresh();
     } else {
       const data = await res.json();
@@ -66,14 +70,7 @@ export default function CreateTaskForm({
         gap: 12,
       }}
     >
-      <h3
-        style={{
-          fontSize: 15,
-          fontWeight: 700,
-          color: "var(--text-primary)",
-          marginBottom: 4,
-        }}
-      >
+      <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
         Create Task
       </h3>
       <input

@@ -23,8 +23,13 @@ const COLUMNS = [
   { key: "DONE", title: "Done", color: "#4ade80", bg: "rgba(34,197,94,0.08)" },
 ] as const;
 
-export default function KanbanBoard({ tasks: initialTasks }: { tasks: Task[] }) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+export default function KanbanBoard({
+  tasks,
+  onTasksChange,
+}: {
+  tasks: Task[];
+  onTasksChange: (tasks: Task[]) => void;
+}) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   async function moveTask(taskId: string, newStatus: Task["status"]) {
@@ -38,8 +43,9 @@ export default function KanbanBoard({ tasks: initialTasks }: { tasks: Task[] }) 
       if (!ok) return;
     }
 
-    setTasks((prev) =>
-      prev.map((t) => (t._id === taskId ? { ...t, status: newStatus } : t))
+    // Optimistic update via parent
+    onTasksChange(
+      tasks.map((t) => (t._id === taskId ? { ...t, status: newStatus } : t))
     );
 
     setLoadingId(taskId);
@@ -50,9 +56,8 @@ export default function KanbanBoard({ tasks: initialTasks }: { tasks: Task[] }) 
     });
 
     if (!res.ok) {
-      setTasks((prev) =>
-        prev.map((t) => (t._id === taskId ? { ...t, status: task.status } : t))
-      );
+      // Revert on failure
+      onTasksChange(tasks);
       const data = await res.json();
       toast.error(data.message || "Failed to update task");
     } else {
@@ -81,7 +86,7 @@ export default function KanbanBoard({ tasks: initialTasks }: { tasks: Task[] }) 
             key={col.key}
             style={{
               background: col.bg,
-              border: `1px solid var(--border)`,
+              border: "1px solid var(--border)",
               borderRadius: 12,
               padding: 14,
               minHeight: 200,
@@ -165,9 +170,7 @@ export default function KanbanBoard({ tasks: initialTasks }: { tasks: Task[] }) 
                               ...provided.draggableProps.style,
                               background: "var(--surface)",
                               border: `1px solid ${
-                                snapshot.isDragging
-                                  ? "#6366f1"
-                                  : "var(--border)"
+                                snapshot.isDragging ? "#6366f1" : "var(--border)"
                               }`,
                               borderRadius: 8,
                               padding: "10px 12px",
