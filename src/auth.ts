@@ -5,6 +5,7 @@ import User from "./models/User.model";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
+  secret: process.env.AUTH_SECRET,
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID!,
@@ -16,6 +17,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  pages: {
+    error: "/signin",
+  },
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
@@ -25,7 +29,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           bio?: string;
           html_url?: string;
         };
-
         await User.findOneAndUpdate(
           { email: user.email },
           {
@@ -42,7 +45,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return true;
       } catch (error) {
         console.error("Error saving user:", error);
-        return false;
+        return true;
       }
     },
 
@@ -63,5 +66,4 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
   },
-  secret: process.env.AUTH_SECRET,
 });
