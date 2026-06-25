@@ -4,6 +4,7 @@ import { connectDB } from "./lib/db";
 import User from "./models/User.model";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID!,
@@ -34,7 +35,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             githubUsername: githubProfile.login,
             githubBio: githubProfile.bio,
             githubUrl: githubProfile.html_url,
-            // Save access token for GitHub API calls
             githubAccessToken: account?.access_token,
           },
           { upsert: true, new: true }
@@ -50,9 +50,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (session.user) {
         try {
           await connectDB();
-          const dbUser = await User.findOne({
-            email: session.user.email,
-          });
+          const dbUser = await User.findOne({ email: session.user.email });
           if (dbUser) {
             session.user.id = dbUser._id.toString();
           } else {
