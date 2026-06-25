@@ -235,7 +235,7 @@ export default function HubTabs({
             {reviews.length === 0 ? (
               <div style={{ background: "var(--surface)", border: "1px dashed var(--border)", borderRadius: 12, padding: 32, textAlign: "center" }}>
                 <p style={{ color: "var(--text-muted)", fontSize: 14 }}>
-                  No reviews yet. Mark project as Completed to unlock reviews.
+                  No reviews yet.
                 </p>
               </div>
             ) : (

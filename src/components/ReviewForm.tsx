@@ -73,39 +73,55 @@ export default function ReviewForm({
   }
 
   // Locked state — project not completed
-  if (projectStatus !== "COMPLETED") {
-    return (
-      <div
+if (projectStatus !== "COMPLETED") {
+  return (
+    <div
+      style={{
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        borderRadius: 12,
+        padding: "24px 28px",
+      }}
+    >
+      <h2
         style={{
-          background: "var(--surface)",
-          border: "1px solid var(--border)",
-          borderRadius: 12,
-          padding: "24px 28px",
+          fontSize: 16,
+          fontWeight: 700,
+          color: "var(--text-primary)",
+          marginBottom: 10,
         }}
       >
-        <h2
-          style={{
-            fontSize: 16,
-            fontWeight: 700,
-            color: "var(--text-primary)",
-            marginBottom: 10,
-          }}
-        >
-          Review Teammates
-        </h2>
-        <p
-          style={{
-            fontSize: 14,
-            color: "var(--text-muted)",
-            lineHeight: 1.6,
-          }}
-        >
-          Reviews will be unlocked when the project is marked as{" "}
-          <span style={{ color: "#4ade80", fontWeight: 600 }}>Completed</span>.
-        </p>
-      </div>
-    );
-  }
+        Review Teammates
+      </h2>
+      <p
+        style={{
+          fontSize: 14,
+          color: "var(--text-muted)",
+          lineHeight: 1.6,
+        }}
+      >
+        Reviews will be unlocked when the project is marked as{" "}
+        <span style={{ color: "#4ade80", fontWeight: 600 }}>Completed</span>.
+      </p>
+      <button
+        onClick={() => window.location.reload()}
+        style={{
+          marginTop: 16,
+          background: "transparent",
+          border: "1px solid var(--border)",
+          color: "var(--text-muted)",
+          padding: "6px 14px",
+          borderRadius: 7,
+          fontSize: 12,
+          cursor: "pointer",
+          fontWeight: 500,
+        }}
+      >
+        Already marked? Click to refresh
+      </button>
+    </div>
+  );
+}
 
   const inputStyle = {
     width: "100%",
