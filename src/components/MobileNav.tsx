@@ -7,16 +7,20 @@ import ThemeToggle from "./ThemeToggle";
 export default function MobileNav({
   session,
   pendingInvitations,
+  pendingApplications,
   userImage,
 }: {
   session: boolean;
   pendingInvitations: number;
+  pendingApplications: number;
   userImage: string | null;
 }) {
   const [open, setOpen] = useState(false);
 
   const linkStyle = {
-    display: "block",
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
     padding: "12px 16px",
     fontSize: 15,
     fontWeight: 500,
@@ -84,7 +88,6 @@ export default function MobileNav({
       {/* Drawer */}
       {open && (
         <>
-          {/* Backdrop */}
           <div
             onClick={() => setOpen(false)}
             style={{
@@ -96,7 +99,6 @@ export default function MobileNav({
             }}
           />
 
-          {/* Menu */}
           <div
             style={{
               position: "fixed",
@@ -112,7 +114,6 @@ export default function MobileNav({
               gap: 4,
             }}
           >
-            {/* User info */}
             {session && userImage && (
               <div
                 style={{
@@ -134,9 +135,7 @@ export default function MobileNav({
                     border: "2px solid var(--border)",
                   }}
                 />
-                <span
-                  style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}
-                >
+                <span style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)" }}>
                   My Account
                 </span>
               </div>
@@ -151,22 +150,34 @@ export default function MobileNav({
                 <a href="/create-project" style={linkStyle} onClick={() => setOpen(false)}>
                   Create Project
                 </a>
+
                 <a href="/dashboard" style={linkStyle} onClick={() => setOpen(false)}>
                   Dashboard
+                  {pendingApplications > 0 && (
+                    <span
+                      style={{
+                        background: "#f59e0b",
+                        color: "white",
+                        fontSize: 10,
+                        fontWeight: 700,
+                        width: 18,
+                        height: 18,
+                        borderRadius: "50%",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {pendingApplications > 9 ? "9+" : pendingApplications}
+                    </span>
+                  )}
                 </a>
+
                 <a href="/profile" style={linkStyle} onClick={() => setOpen(false)}>
                   Profile
                 </a>
-                
-                <a  href="/invitations"
-                  style={{
-                    ...linkStyle,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
-                  onClick={() => setOpen(false)}
-                >
+
+                <a href="/invitations" style={linkStyle} onClick={() => setOpen(false)}>
                   Invitations
                   {pendingInvitations > 0 && (
                     <span
@@ -218,12 +229,12 @@ export default function MobileNav({
 
             {!session && (
               
-               <a href="/signin"
+              <a  href="/signin"
                 style={{
                   ...linkStyle,
                   background: "#6366f1",
                   color: "white",
-                  textAlign: "center" as const,
+                  justifyContent: "center",
                   marginTop: 8,
                 }}
                 onClick={() => setOpen(false)}
