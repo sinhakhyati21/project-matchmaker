@@ -7,6 +7,7 @@ import Application from "../models/Application.model";
 import Project from "../models/Project.model";
 import ThemeToggle from "./ThemeToggle";
 import MobileNav from "./MobileNav";
+import mongoose from "mongoose";
 
 export default async function Navbar() {
   const session = await auth();
@@ -15,24 +16,30 @@ export default async function Navbar() {
   let pendingApplications = 0;
 
   if (session) {
-    await connectDB();
+    try {
+      // Only query if session.user.id is a valid MongoDB ObjectId
+      const isValidId = mongoose.Types.ObjectId.isValid(session.user.id);
+      if (isValidId) {
+        await connectDB();
 
-    pendingInvitations = await Invitation.countDocuments({
-      receiver: session.user.id,
-      status: "PENDING",
-    });
+        pendingInvitations = await Invitation.countDocuments({
+          receiver: session.user.id,
+          status: "PENDING",
+        });
 
-    // Get all projects owned by user
-    const myProjects = await Project.find(
-      { owner: session.user.id },
-      { _id: 1 }
-    );
+        const myProjects = await Project.find(
+          { owner: session.user.id },
+          { _id: 1 }
+        );
 
-    // Count pending applications to those projects
-    pendingApplications = await Application.countDocuments({
-      project: { $in: myProjects.map((p) => p._id) },
-      status: "PENDING",
-    });
+        pendingApplications = await Application.countDocuments({
+          project: { $in: myProjects.map((p) => p._id) },
+          status: "PENDING",
+        });
+      }
+    } catch (error) {
+      console.error("Navbar DB error:", error);
+    }
   }
 
   return (
@@ -118,7 +125,6 @@ export default async function Navbar() {
               Create
             </Link>
 
-            {/* Dashboard with pending applications badge */}
             <Link
               href="/dashboard"
               style={{
@@ -169,7 +175,6 @@ export default async function Navbar() {
               Profile
             </Link>
 
-            {/* Invitations with badge */}
             <Link
               href="/invitations"
               style={{
