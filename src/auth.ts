@@ -6,9 +6,11 @@ import User from "./models/User.model";
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   secret: process.env.AUTH_SECRET,
+
   session: {
     strategy: "jwt",
   },
+
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID!,
@@ -20,19 +22,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+
   pages: {
+    signIn: "/signin",
     error: "/signin",
   },
+
   callbacks: {
     async signIn({ user, account, profile }) {
       try {
         await connectDB();
+
         const githubProfile = profile as {
           login?: string;
           bio?: string;
           html_url?: string;
         };
-        if (!user.email) return true;
+
+        if (!user.email) return false;
+
         await User.findOneAndUpdate(
           { email: user.email },
           {
@@ -44,34 +52,41 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             githubUrl: githubProfile.html_url,
             githubAccessToken: account?.access_token,
           },
-          { upsert: true, returnDocument: "after" }
+          { upsert: true, new: true }
         );
+
         return true;
       } catch (error) {
-        console.error("Error saving user:", error);
-        return true;
+        console.error("Error saving GitHub user:", error);
+        return false;
       }
     },
 
     async jwt({ token }) {
       try {
         await connectDB();
+
         if (token.email) {
           const dbUser = await User.findOne({ email: token.email });
+
           if (dbUser) {
             token.id = dbUser._id.toString();
+            token.githubUsername = dbUser.githubUsername;
           }
         }
       } catch (error) {
         console.error("JWT callback error:", error);
       }
+
       return token;
     },
 
     async session({ session, token }) {
-      if (session.user && token.id) {
+      if (session.user) {
         session.user.id = token.id as string;
+        session.user.githubUsername = token.githubUsername as string;
       }
+
       return session;
     },
   },
